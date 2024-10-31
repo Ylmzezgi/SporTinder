@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">SporFinder</string>
+    <string name="kayıt_olmadan_devam_et"><u>Kayıt olmadan devam et</u></string>
+
 </resources>
