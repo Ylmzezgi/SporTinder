@@ -31,9 +31,8 @@
                    android:layout_width="100dp"
                    android:layout_height="100dp"
                    android:src="@drawable/gallery"
-                   android:scaleType="fitXY"
                    android:layout_marginTop="15dp"
-                   app:civ_border_width="45dp"
+                   app:civ_border_width="1dp"
                    android:layout_gravity="center"
                    app:civ_border_color="@color/black"/>
             <TextView
@@ -113,20 +112,16 @@
                 android:textSize="16sp"
                 android:layout_marginTop="25dp"/>
 
-            <EditText
-                android:id="@+id/cityEditText"
+            <Spinner
+                android:id="@+id/mySpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/edittextstyle"
-                android:ems="10"
-                android:layout_marginTop="5dp"
-                android:hint="İl giriniz"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center"
                 android:elevation="5dp"
-                android:padding="15dp"
-                android:inputType="text"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                tools:layout_editor_absoluteY="137dp" />
+              />
+
 
             <TextView
                 android:layout_width="match_parent"
@@ -136,20 +131,15 @@
                 android:textSize="16sp"
                 android:layout_marginTop="25dp"/>
 
-            <EditText
-                android:id="@+id/townshipEditText"
+            <Spinner
+                android:id="@+id/locationSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/edittextstyle"
-                android:ems="10"
-                android:layout_marginTop="5dp"
-                android:hint="İlçe giriniz"
-                android:inputType="text"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center"
                 android:elevation="5dp"
-                android:padding="15dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                tools:layout_editor_absoluteY="137dp" />
+                />
 
             <TextView
                 android:layout_width="match_parent"
