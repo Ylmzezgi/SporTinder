@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RegisterPage"
+    tools:context=".pages.RegisterPage"
     android:background="#F6F2F2">
     <ScrollView
         android:layout_width="match_parent"
