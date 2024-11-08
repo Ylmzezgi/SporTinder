@@ -1,6 +1,7 @@
 package com.ezgiyilmaz.sporfinder.viewModel
 
 import FirebaseUserHelper
+import android.content.Intent
 import android.widget.ArrayAdapter
 import androidx.lifecycle.ViewModel
 import com.ezgiyilmaz.sporfinder.models.Login
@@ -33,11 +34,12 @@ class registerPageViewModel : ViewModel() {
 
     fun getApiInterface() {
         apiInterface = retrofitService.getInstance().create(getService::class.java)
+        //API bağlantısını kurar ve retrofitService ile getService arayüzünü alır.
     }
 
 
     suspend fun getCity() {
-        val response = apiInterface.getCity().await() // Execute the call once
+        val response = apiInterface.getCity().await() //şehir verisini alır.
         cities = response.orEmpty()
             .firstOrNull { it.name == "il" }?.data  // Access the "il" data
             ?.mapNotNull { it.name.trim() } ?: emptyList()

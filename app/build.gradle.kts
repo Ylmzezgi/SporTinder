@@ -1,7 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.5.0" // Hata burada düzeltildi
+    id("com.google.gms.google-services")
+
 }
 
 android {
@@ -61,5 +62,6 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.3.0")
     implementation ("com.google.firebase:firebase-auth-ktx:21.0.1")
     implementation ("com.google.firebase:firebase-firestore-ktx:24.0.1")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
 }
