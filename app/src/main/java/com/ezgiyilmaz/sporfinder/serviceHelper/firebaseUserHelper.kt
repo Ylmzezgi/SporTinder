@@ -1,8 +1,21 @@
+import android.content.Context
+import android.content.Intent
+import android.util.Log
+import android.widget.Toast
+import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.ViewModel
+import com.ezgiyilmaz.sporfinder.constans
 import com.ezgiyilmaz.sporfinder.models.Register
 import com.ezgiyilmaz.sporfinder.models.Login
+import com.ezgiyilmaz.sporfinder.pages.MainActivity
+import com.ezgiyilmaz.sporfinder.pages.RegisterPage
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+
 
 class FirebaseUserHelper {
 
@@ -30,8 +43,28 @@ class FirebaseUserHelper {
         }
     }
 
-    fun deleteAuth(auth: FirebaseAuth){
+    fun deleteAuth(auth: FirebaseAuth) {
         auth.currentUser!!.delete()
     }
+
+
+    suspend fun loginUserAuth(auth: FirebaseAuth, login: Login): String {
+
+        try {
+            val sonuc = auth.signInWithEmailAndPassword(login.email, login.password).await()
+
+            if (sonuc.user == null) {
+                return "Başarısız giriş"
+            } else {
+                return "Başarılı"
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return e.localizedMessage ?: "Giriş başarısız"
+        }
+
+        return constans.gecersizLink
+    }
+
 }
 
