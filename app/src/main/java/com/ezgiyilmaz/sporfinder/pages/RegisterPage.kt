@@ -16,6 +16,7 @@ import com.ezgiyilmaz.sporfinder.databinding.ActivityRegisterPageBinding
 import com.ezgiyilmaz.sporfinder.models.city
 import com.ezgiyilmaz.sporfinder.serviceHelper.getService
 import com.ezgiyilmaz.sporfinder.services.retrofitService
+import com.ezgiyilmaz.sporfinder.viewModel.LocationPickerViewModel
 import com.ezgiyilmaz.sporfinder.viewModel.registerPageViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
@@ -33,6 +34,7 @@ import java.util.UUID
 class RegisterPage : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterPageBinding
     private lateinit var viewModel: registerPageViewModel
+    private lateinit var locationPicker: LocationPickerViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,17 +42,19 @@ class RegisterPage : AppCompatActivity() {
         setContentView(binding.root)
         enableEdgeToEdge()
         FirebaseApp.initializeApp(this)
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
         viewModel = ViewModelProvider(this).get(registerPageViewModel::class.java)
-        viewModel.getApiInterface()
+        locationPicker = ViewModelProvider(this).get(LocationPickerViewModel::class.java)
+        locationPicker.getApiInterface()
         viewModel.db= Firebase.firestore
         viewModel.auth=Firebase.auth
         GlobalScope.launch(Dispatchers.IO) {
-            viewModel.getCity()
+            locationPicker.getCity()
             withContext(Dispatchers.Main) {
                 fillCitySpinner()
             }
@@ -67,10 +71,10 @@ class RegisterPage : AppCompatActivity() {
                 val selectedCity = parent.getItemAtPosition(position).toString()
                 println("Seçilen Şehir: $selectedCity")
 
-                val selected = viewModel.cityId.filter { city: city -> city.name == selectedCity }
+                val selected = locationPicker.cityId.filter { city: city -> city.name == selectedCity }
 
                 GlobalScope.launch(Dispatchers.IO) {
-                    viewModel.getTownShip(selected.firstOrNull()?.id)
+                    locationPicker.getTownShip(selected.firstOrNull()?.id)
                     withContext(Dispatchers.Main) {
                         fillTownShipSpinner()
                     }
@@ -86,14 +90,14 @@ class RegisterPage : AppCompatActivity() {
     }
 
     suspend fun fillCitySpinner() {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, viewModel.cities)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, locationPicker.cities)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.mySpinner.adapter = adapter
     }
 
 
     suspend fun fillTownShipSpinner() {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, viewModel.townShips)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, locationPicker.townShips)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.locationSpinner.adapter = adapter
     }

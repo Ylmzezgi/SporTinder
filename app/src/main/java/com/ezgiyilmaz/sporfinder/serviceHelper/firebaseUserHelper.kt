@@ -4,7 +4,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.ViewModel
-import com.ezgiyilmaz.sporfinder.constans
 import com.ezgiyilmaz.sporfinder.models.Register
 import com.ezgiyilmaz.sporfinder.models.Login
 import com.ezgiyilmaz.sporfinder.pages.MainActivity
@@ -63,7 +62,7 @@ class FirebaseUserHelper {
             return e.localizedMessage ?: "Giriş başarısız"
         }
 
-        return constans.gecersizLink
+        return "Geçersiz Link"
     }
 
 
