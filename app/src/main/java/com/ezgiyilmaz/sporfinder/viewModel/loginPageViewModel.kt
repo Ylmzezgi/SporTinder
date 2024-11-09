@@ -104,4 +104,17 @@ class loginPageViewModel : ViewModel() {
             return false
         }
     }
+
+   suspend fun sendPasswordResetEmail(email: String):String {
+
+       try {
+           Firebase.auth.sendPasswordResetEmail(email).await()
+           return "gönderildi"
+       } catch (e: Exception) {
+           return e.localizedMessage
+       }
+       return "Email gönderildi"
+   }
+
+
 }

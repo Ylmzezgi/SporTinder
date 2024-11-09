@@ -74,7 +74,25 @@ class LoginPage : AppCompatActivity() {
     }
 
 
+    fun şifreunutmaOnClick(view: View) {
 
+        val email = binding.EmailAddressEditText.text.toString()
+        if(email.isEmpty()){
+            Toast.makeText(view.context, "Email Giriniz", Toast.LENGTH_LONG).show()
+            return
+        }
+        CoroutineScope(Dispatchers.IO).launch {
+            val result=viewModel.sendPasswordResetEmail(email)
+            withContext(Dispatchers.Main){
+                if(result=="gönderildi"){
+                    Toast.makeText(view.context, "Email Gönderildi", Toast.LENGTH_LONG).show()
+                }else{
+                        Toast.makeText(view.context, result, Toast.LENGTH_LONG).show()
+                    }
+
+                }
+            }
+    }
 
     fun kayıtOlmadanOnClick(view: View){
         viewModel.homeIntent(this)
