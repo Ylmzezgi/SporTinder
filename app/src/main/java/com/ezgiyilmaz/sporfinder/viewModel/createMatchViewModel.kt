@@ -5,9 +5,11 @@ import com.ezgiyilmaz.sporfinder.models.playerModel
 import com.ezgiyilmaz.sporfinder.models.rivalModel
 import com.ezgiyilmaz.sporfinder.serviceHelper.firebaseMatchHelper
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 
 class CreateMatchViewModel : ViewModel() {
     val firebaseMatchHelper = firebaseMatchHelper()
+    val auth=FirebaseAuth.getInstance()
 
     suspend fun saveViewModel(
         selected: String,
@@ -21,6 +23,8 @@ class CreateMatchViewModel : ViewModel() {
         note: String
 
     ): String {
+        if(auth.currentUser==null)
+            return  "Giriş yapınız"
 
         if (Category.isNullOrEmpty())
             return "Kategori Seçmediniz"
@@ -47,11 +51,11 @@ class CreateMatchViewModel : ViewModel() {
             return "Seçim Yapınız"
 
         if (selected == "rival") {
-            val rivalModel = rivalModel(Category, cal, city, townShips, note)
+            val rivalModel = rivalModel(auth.currentUser!!.uid, Category, cal, city, townShips, note)
             val message = firebaseMatchHelper.rivalAddFirebase(rivalModel)
             return message
         } else {
-            val playerModel = playerModel(Category, lookingFor, cal, city, townShips, note)
+            val playerModel = playerModel(auth.currentUser!!.uid,Category, lookingFor, cal, city, townShips, note)
             val message = firebaseMatchHelper.playerAddFirebase(playerModel)
             return message
         }
