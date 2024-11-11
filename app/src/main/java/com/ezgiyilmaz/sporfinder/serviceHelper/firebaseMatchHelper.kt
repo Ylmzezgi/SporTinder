@@ -1,12 +1,16 @@
 package com.ezgiyilmaz.sporfinder.serviceHelper
 
+import com.ezgiyilmaz.sporfinder.models.GetPlayerModel
+import com.ezgiyilmaz.sporfinder.models.GetRivalModel
 import com.ezgiyilmaz.sporfinder.models.playerModel
 import com.ezgiyilmaz.sporfinder.models.rivalModel
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
 class firebaseMatchHelper {
-    private val db=FirebaseFirestore.getInstance()
+    private val db = FirebaseFirestore.getInstance()
+    val getRivalList = mutableListOf<GetRivalModel>()
+    val getPlayerList = mutableListOf<GetPlayerModel>()
 
     suspend fun rivalAddFirebase(rivalModel: rivalModel): String {
         try {
@@ -23,6 +27,49 @@ class firebaseMatchHelper {
             return "eklendi"
         }catch (e:Exception){
             return e.localizedMessage
+        }
+    }
+
+
+    suspend fun getRivalFirebase(): List<GetRivalModel> {
+        try {
+            getRivalList.clear()
+            db.collection("rakipBul").get().addOnSuccessListener {
+                for (document in it) {
+                    val getRivalModel = GetRivalModel(
+                        document.get("userid").toString(),
+                        document.get("category").toString(),
+                        document.get("city").toString(),
+                        document.getTimestamp("dateTime")!!,
+                        document.get("note").toString(),
+                        document.get("townShip").toString(),
+                        document.id
+                    )
+                    getRivalList.add(getRivalModel)
+                }
+            }.await()
+            return getRivalList
+        } catch (e: Exception) {
+            return emptyList()
+        }
+    }
+
+
+    suspend fun getPlayerFirebase() :List<GetPlayerModel>{
+        try {
+            getPlayerList.clear()
+            db.collection("oyuncuBul").get().addOnSuccessListener { result ->
+                for (document in result) {
+                    val getPlayerModel= document.toObject(GetPlayerModel::class.java).copy(id = document.id)
+
+                    getPlayerList.add(getPlayerModel)
+                }
+
+            }.await()
+            return getPlayerList
+
+        } catch (e: Exception) {
+            return emptyList()
         }
     }
 }
