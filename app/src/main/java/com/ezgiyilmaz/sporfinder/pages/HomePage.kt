@@ -1,51 +1,41 @@
 package com.ezgiyilmaz.sporfinder.pages
 
+import PagingViewModel
+import RivalAdapter
 import android.os.Bundle
-import android.util.Log
-import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ezgiyilmaz.sporfinder.R
 import com.ezgiyilmaz.sporfinder.databinding.ActivityHomePageBinding
-import com.ezgiyilmaz.sporfinder.util.constants
-import com.ezgiyilmaz.sporfinder.viewModel.HomePageAdapter
-import com.ezgiyilmaz.sporfinder.viewModel.HomePageViewModel
-import com.ezgiyilmaz.sporfinder.viewModel.LocationPickerViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class HomePage : AppCompatActivity() {
     private lateinit var binding: ActivityHomePageBinding
-    private lateinit var homeAdapter: HomePageAdapter
-    private lateinit var db: FirebaseFirestore
-    private lateinit var auth: FirebaseAuth
-    private lateinit var homeViewModel: HomePageViewModel
+    private lateinit var rivalViewModel: PagingViewModel
+    private lateinit var rivalAdapter: RivalAdapter
+
     var selected = "player"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        println("HomePage başlatılıyor.")
         binding = ActivityHomePageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        auth = FirebaseAuth.getInstance()
-        db = FirebaseFirestore.getInstance()
-        homeViewModel = ViewModelProvider(this).get(HomePageViewModel::class.java)
-        binding.recyclerView.layoutManager =
-            LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
+        // ViewModel oluşturuluyor
+        rivalViewModel = ViewModelProvider(this).get(PagingViewModel::class.java)
+        println("PagingViewModel oluşturuldu.")
 
+        setAdapter()
         fillList()
 
+        // Edge-to-Edge özelliği etkinleştiriliyor
         enableEdgeToEdge()
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -53,24 +43,52 @@ class HomePage : AppCompatActivity() {
             insets
         }
 
-        binding.radioRival.setOnCheckedChangeListener { buttonView, isChecked ->
+        // RadioButton dinleyicisi ayarlanıyor
+        binding.radioRival.setOnCheckedChangeListener { _, isChecked ->
+            println("RadioButton durumu değiştirildi. Seçili: ${if (isChecked) "rival" else "player"}")
+            setAdapter()
             if (isChecked) {
                 selected = "rival"
-              fillList()
+                fillListRival()
             } else {
                 selected = "player"
                 fillList()
             }
         }
-
     }
-    fun fillList(){
-        GlobalScope.launch(Dispatchers.IO) {
-            val adapter=homeViewModel.ClickPlayerViewModel(selected)
-            withContext(Dispatchers.Main){
-                binding.recyclerView.adapter=adapter
+
+    // Oyuncu listesini doldurur
+    fun fillList() {
+        println("Oyuncu listesi dolduruluyor.")
+        lifecycleScope.launch {
+            rivalViewModel.playerPagingData.collectLatest {
+                println("Oyuncu listesi güncelleniyor.")
+                rivalAdapter.submitData(it)
             }
         }
     }
 
+    // Rakip listesini doldurur
+    fun fillListRival() {
+        println("Rakip listesi dolduruluyor.")
+        lifecycleScope.launch {
+            rivalViewModel.rivalPagingData.collectLatest {
+                println("Rakip listesi güncelleniyor.")
+                rivalAdapter.submitData(it)
+            }
+        }
+    }
+
+    // RecyclerView adaptörünü ayarlar
+    fun setAdapter() {
+        println("RecyclerView adaptörü ayarlanıyor.")
+        rivalAdapter = RivalAdapter()
+
+        // RecyclerView ayarları
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(this@HomePage)
+            adapter = rivalAdapter
+        }
+        println("RecyclerView adaptörü ayarlandı.")
+    }
 }

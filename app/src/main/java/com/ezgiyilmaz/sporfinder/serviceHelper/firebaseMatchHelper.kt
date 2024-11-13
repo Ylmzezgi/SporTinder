@@ -5,6 +5,7 @@ import com.ezgiyilmaz.sporfinder.models.GetRivalModel
 import com.ezgiyilmaz.sporfinder.models.playerModel
 import com.ezgiyilmaz.sporfinder.models.rivalModel
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.tasks.await
 
 class firebaseMatchHelper {
@@ -36,15 +37,7 @@ class firebaseMatchHelper {
             getRivalList.clear()
             db.collection("rakipBul").get().addOnSuccessListener {
                 for (document in it) {
-                    val getRivalModel = GetRivalModel(
-                        document.get("userid").toString(),
-                        document.get("category").toString(),
-                        document.get("city").toString(),
-                        document.getTimestamp("dateTime")!!,
-                        document.get("note").toString(),
-                        document.get("townShip").toString(),
-                        document.id
-                    )
+                    val getRivalModel = document.toObject(GetRivalModel::class.java).copy(id = document.id)
                     getRivalList.add(getRivalModel)
                 }
             }.await()
