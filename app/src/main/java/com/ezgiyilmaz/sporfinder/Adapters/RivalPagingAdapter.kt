@@ -1,3 +1,6 @@
+import android.content.Intent
+import android.graphics.ColorSpace.match
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
@@ -7,13 +10,12 @@ import com.ezgiyilmaz.sporfinder.R
 import com.ezgiyilmaz.sporfinder.databinding.ListitemBinding
 import com.ezgiyilmaz.sporfinder.models.GetPlayerModel
 import com.ezgiyilmaz.sporfinder.models.GetRivalModel
+import com.ezgiyilmaz.sporfinder.pages.DetailPage
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class RivalAdapter (var onItemClick:Any): PagingDataAdapter<Any, RivalAdapter.MovieViewHolder>(MOVIE_COMPARATOR) {
-
+class RivalAdapter : PagingDataAdapter<Any, RivalAdapter.MovieViewHolder>(MOVIE_COMPARATOR) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
-        println("ViewHolder oluşturuluyor")
         val binding = ListitemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return MovieViewHolder(binding)
     }
@@ -21,39 +23,49 @@ class RivalAdapter (var onItemClick:Any): PagingDataAdapter<Any, RivalAdapter.Mo
     override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
         val match = getItem(position)
         if (match != null) {
-            println("ViewHolder ${position}. pozisyona bağlanıyor")
             holder.bind(match)
-        } else {
-            println("${position}. pozisyonda öğe null geldi")
+
+            holder.itemView.setOnClickListener {
+                val context = holder.itemView.context
+                val intent = Intent(context, DetailPage::class.java).apply {
+                    if (match is GetPlayerModel) {
+                        putExtra("playerId", match.id)
+                    } else {
+                        match as GetRivalModel
+                        putExtra("rivalId", match.id)
+                    }
+                }
+                context.startActivity(intent)
+
+            }
         }
     }
 
-    class MovieViewHolder(private val binding: ListitemBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(rival: Any) {
-            println("bind fonksiyonu çağrıldı")
+    class MovieViewHolder(private val binding: ListitemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(match: Any) {
             var category = ""
 
-            if (rival is GetRivalModel) {
-                println("GetRivalModel bulundu: ${rival.category}")
-                category = rival.category
-                binding.playItemTextview.text = rival.category
-                binding.locationItemTextView.text = rival.city
+            if (match is GetRivalModel) {
+                println("GetRivalModel bulundu: ${match.category}")
+                category = match.category
+
+                binding.playItemTextview.text = match.category
+                binding.locationItemTextView.text = match.city
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-                val formattedDate = dateFormat.format(rival.dateTime!!.toDate())
+                val formattedDate = dateFormat.format(match.dateTime!!.toDate())
                 binding.dateItemTextView.text = formattedDate
-            }
-            else {
-                rival as GetPlayerModel
-                println("GetPlayerModel bulundu: ${rival.category}")
-                category = rival.category
-                binding.playItemTextview.text = rival.category
-                binding.locationItemTextView.text = rival.city
+            } else {
+                match as GetPlayerModel
+                println("GetPlayerModel bulundu: ${match.category}")
+                category = match.category
+                binding.playItemTextview.text = match.category
+                binding.locationItemTextView.text = match.city
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-                val formattedDate = dateFormat.format(rival.dateTime!!.toDate())
+                val formattedDate = dateFormat.format(match.dateTime!!.toDate())
                 binding.dateItemTextView.text = formattedDate
 
             }
-
 
             // Kategoriye göre görsel ayarlama
             when (category) {
@@ -64,23 +76,28 @@ class RivalAdapter (var onItemClick:Any): PagingDataAdapter<Any, RivalAdapter.Mo
                         println("Futbol öğesine tıklandı")
                     }
                 }
+
                 "Basketbol" -> {
                     println("Kategori Basketbol, görsel ayarlandı")
                     binding.imageView2.setImageResource(R.drawable.basketball)
                 }
+
                 "Tenis" -> {
                     println("Kategori Tenis, görsel ayarlandı")
                     binding.imageView2.setImageResource(R.drawable.tennis)
                 }
+
                 "Voleybol" -> {
                     println("Kategori Voleybol, görsel ayarlandı")
                     binding.imageView2.setImageResource(R.drawable.volleyball)
                 }
+
                 else -> {
                     println("Kategori tanınmadı")
                 }
 
             }
+
 
         }
 

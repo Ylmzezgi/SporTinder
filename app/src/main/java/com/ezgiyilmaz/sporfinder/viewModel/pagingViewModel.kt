@@ -29,4 +29,7 @@ class PagingViewModel : ViewModel() {
         pagingSourceFactory = { PagingSource(firestore,"rakipBul") }
     ).flow.cachedIn(viewModelScope)
 
+
+
+
 }

@@ -27,15 +27,12 @@ class HomePage : AppCompatActivity() {
         println("HomePage başlatılıyor.")
         binding = ActivityHomePageBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // ViewModel oluşturuluyor
         rivalViewModel = ViewModelProvider(this).get(PagingViewModel::class.java)
         println("PagingViewModel oluşturuldu.")
 
         setAdapter()
         fillList()
 
-        // Edge-to-Edge özelliği etkinleştiriliyor
         enableEdgeToEdge()
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
