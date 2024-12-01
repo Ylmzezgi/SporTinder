@@ -114,6 +114,7 @@ class RivalAdapter : PagingDataAdapter<Any, RivalAdapter.MovieViewHolder>(MOVIE_
                     newItem as GetPlayerModel
                     oldItem.id == newItem.id
                 }
+                Log.d("TAG", "areItemsTheSame: "+result)
                 println("areItemsTheSame sonucu: $result")
                 return result
             }
