@@ -6,10 +6,10 @@ import com.ezgiyilmaz.sporfinder.serviceHelper.getService
 import com.ezgiyilmaz.sporfinder.services.retrofitService
 import retrofit2.await
 
-class LocationPickerViewModel:ViewModel(){
+class LocationPickerViewModel : ViewModel() {
     private lateinit var apiInterface: getService
-    lateinit var cities: List<String>
-    lateinit var townShips: List<String>
+    var cities: List<String> = emptyList()
+    var townShips: List<String> = emptyList()
     lateinit var cityId: List<city>
     fun getApiInterface() {
 
@@ -19,16 +19,18 @@ class LocationPickerViewModel:ViewModel(){
 
 
     suspend fun getCity() {
+        //API'den şehir bilgilerini alır ve bunları cities ve cityId listelerine dönüştürür.
         val response = apiInterface.getCity().await() //şehir verisini alır.
         cities = response.orEmpty()
-            .firstOrNull { it.name == "il" }?.data  // Access the "il" data
-            ?.mapNotNull { it.name.trim() } ?: emptyList()
+            .firstOrNull { it.name == "il" }?.data  // Verilerde "il" adında bir grup arar.
+            ?.mapNotNull { it.name.trim() } ?: emptyList() //Şehir isimlerini işler ve listeye ekler.
 
         cityId = response.orEmpty()
             .firstOrNull { it.name == "il" }?.data  // Access the "il" data
             ?.mapNotNull { city(it.id, it.name) } ?: emptyList()
 
-       cities=cities.sorted()
+        cities = cities.sorted() //alfabetik olarak sıralar
+        cityId = cityId.sortedBy { it.name } // şehir isimlerine göre sıralar
 
     }
 
@@ -37,10 +39,10 @@ class LocationPickerViewModel:ViewModel(){
         val response = apiInterface.getTownShip().await() // Execute the call once
         townShips = response.orEmpty()
             .firstOrNull { it.name == "ilce" }?.data  // Access the "il" data
-            ?.filter { it.il_id == ilId }?.map { it.name.trim() } ?: emptyList()
+            ?.filter { it.il_id == ilId }?.map { it.name.trim() } ?: emptyList() //İlçeleri (ilce) filtreler ve yalnızca il_id'si verilen il ile eşleşenleri seçer.
 
 
-         townShips= townShips.sorted()
+        townShips = townShips.sorted()
 
     }
 }

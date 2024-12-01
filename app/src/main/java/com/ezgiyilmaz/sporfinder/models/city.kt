@@ -1,9 +1,9 @@
 package com.ezgiyilmaz.sporfinder.models
 
 import kotlinx.serialization.Serializable
-
+//cities ve city modellerinde verilerin JSON gibi formatlarda serileştirilebilir olmasını sağlar.
 @Serializable
-data class cities(
+data class cities( // ŞEHİR LİSTESİ
     val type: String,
     val version: String?,
     val comment: String?,
@@ -12,7 +12,7 @@ data class cities(
     val data: List<city>?,
 )
 @Serializable
-data class city(
+data class city( // HER BİR ŞEHRİN İDS sini ve İSMİNİ tutar
     val id: String,
     val name: String,
 )

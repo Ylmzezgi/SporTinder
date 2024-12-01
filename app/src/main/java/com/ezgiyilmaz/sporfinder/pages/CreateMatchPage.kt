@@ -113,7 +113,6 @@ class CreateMatchPage : AppCompatActivity() {
             }
 
 
-
         binding.cityTextView.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>,
@@ -124,9 +123,13 @@ class CreateMatchPage : AppCompatActivity() {
 
                 val selectedCity = parent.getItemAtPosition(position).toString()
                 println("Seçilen Şehir: $selectedCity")
+                Log.d("TAG", "onItemSelected: " + selectedCity)
+
 
                 val selected =
                     locationPicker.cityId.filter { city: city -> city.name == selectedCity }
+                Log.d("TAG", "onItemSelected: " + selected)
+
 
                 GlobalScope.launch(Dispatchers.IO) {
                     locationPicker.getTownShip(selected.firstOrNull()?.id)
