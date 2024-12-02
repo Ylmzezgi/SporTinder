@@ -181,7 +181,7 @@ class CreateMatchPage : AppCompatActivity() {
                 cal.set(Calendar.MINUTE, minute)
 
                 val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-                binding.timeTextView.setText(timeFormat.format(cal.time))
+                val a=binding.timeTextView.setText(timeFormat.format(cal.time))
             }
 
             TimePickerDialog(
@@ -199,8 +199,6 @@ class CreateMatchPage : AppCompatActivity() {
     }
 
     fun ClickCreateMatch(view: View) {
-        val radioPlayer = binding.radioPlayer
-        val radioRival = binding.radioRival
         val Category = binding.CategoryTextView.selectedItem.toString()
         val lookingFor = binding.lookingForTextView.selectedItem.toString()
         val date = binding.dateTextView.text.toString()
@@ -209,7 +207,7 @@ class CreateMatchPage : AppCompatActivity() {
         val townShip = binding.townShipTextView.selectedItem.toString()
         val note = binding.noteEditText.text.toString()
 
-
+println(time)
 
         GlobalScope.launch(Dispatchers.IO) {
             val result = createMatchViewModel.saveViewModel(

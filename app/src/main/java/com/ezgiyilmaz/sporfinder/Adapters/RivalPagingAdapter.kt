@@ -36,7 +36,6 @@ class RivalAdapter : PagingDataAdapter<Any, RivalAdapter.MovieViewHolder>(MOVIE_
                     }
                 }
                 context.startActivity(intent)
-
             }
         }
     }

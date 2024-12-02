@@ -44,9 +44,6 @@ class CreateMatchViewModel : ViewModel() {
         if (townShips.isNullOrEmpty())
             return "ilçe alanı boş olamaz"
 
-        if (note.isNullOrEmpty())
-            return "not alanı boş olamaz"
-
         if (selected.isNullOrEmpty())
             return "Seçim Yapınız"
 
