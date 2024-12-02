@@ -3,6 +3,7 @@ package com.ezgiyilmaz.sporfinder.Adapters
 import android.content.Intent
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.ezgiyilmaz.sporfinder.models.FilterCriteria
 import com.ezgiyilmaz.sporfinder.models.GetPlayerModel
 import com.ezgiyilmaz.sporfinder.models.GetRivalModel
 import com.ezgiyilmaz.sporfinder.pages.DetailPage
@@ -90,5 +91,78 @@ class PagingSource(
     override fun getRefreshKey(state: PagingState<Query, Any>): Query? {
         println("getRefreshKey çağrıldı, state: $state")
         return null
+    }
+    suspend fun load2(params: LoadParams<Query>,criteria: FilterCriteria,existingList: List<FilterCriteria>? = null): LoadResult<Query, Any> {
+        return try {
+            // İlk sayfa için sorguyu oluştur
+            val currentQuery = params.key ?: firestore.collection(whichOne)
+                .orderBy("dateTime", Query.Direction.DESCENDING)
+                .whereEqualTo("category",criteria.category)
+                .whereEqualTo("lookingFor",criteria.lookingFor)
+                .whereEqualTo("dateTime",criteria.dateTime)
+                .whereEqualTo("city",criteria.city)
+                .whereEqualTo("townShip",criteria.townShip)
+                .limit(pageSize.toLong())
+            println("currentQuery oluşturuldu: $currentQuery")
+
+            // Firestore sorgusunu çalıştır
+            val snapshot = currentQuery.get().await()
+            println("Snapshot getirildi: ${snapshot.documents.size} belge alındı")
+
+            // Belgeleri veri modellerine dönüştür
+            val player= snapshot.documents.map { document ->
+
+                // Belgeleri veri modellerine dönüştür
+                if (whichOne == "oyuncuBul") {
+                    FilterCriteria(
+
+                        category = document.getString("category") ?: "",
+                        lookingFor = document.getString("lookingFor")?:"",
+                        dateTime = document.getTimestamp("dateTime"),
+                        city = document.getString("city") ?: "",
+                        townShip = document.getString("townShip") ?: "",
+                    )
+
+                } else {
+                    GetRivalModel(
+                        id = document.id,
+                        category = document.getString("category") ?: "",
+                        city = document.getString("city") ?: "",
+                        dateTime = document.getTimestamp("dateTime"),
+                        townShip = document.getString("townShip") ?: "",
+                        note = document.getString("note") ?: "",
+                        userid = document.getString("userid") ?: ""
+                    )
+                }
+                }
+
+            // Sonraki sorguyu oluştur
+            val nextQuery = if (snapshot.size() < pageSize) {
+                null
+            } else {
+                firestore.collection(whichOne)
+                    .orderBy("dateTime", Query.Direction.DESCENDING)
+                    .startAfter(snapshot.documents.last())
+                    .whereEqualTo("category",criteria.category)
+                    .whereEqualTo("lookingFor",criteria.lookingFor)
+                    .whereEqualTo("dateTime",criteria.dateTime)
+                    .whereEqualTo("city",criteria.city)
+                    .whereEqualTo("townShip",criteria.townShip)
+                    .limit(pageSize.toLong())
+            }
+            println("Sonraki sorgu (nextQuery): $nextQuery")
+
+            LoadResult.Page(
+                data = player,
+                prevKey = null,  // Firestore'da önceki sayfa desteği genellikle kullanılmaz
+                nextKey = nextQuery
+            ).also {
+                println("LoadResult.Page oluşturuldu, veri boyutu: ${player.size}")
+            }
+        } catch (e: Exception) {
+            println("Hata oluştu: ${e.message}")
+            LoadResult.Error(e)
+        }
+
     }
 }

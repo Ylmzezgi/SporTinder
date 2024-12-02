@@ -15,24 +15,21 @@ import android.widget.Button
 import android.widget.RadioButton
 import android.widget.Spinner
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.ezgiyilmaz.sporfinder.Adapters.PagingSource
 import com.ezgiyilmaz.sporfinder.R
 import com.ezgiyilmaz.sporfinder.databinding.ActivityHomePageBinding
 import com.ezgiyilmaz.sporfinder.models.FilterCriteria
-import com.ezgiyilmaz.sporfinder.models.cities
-import com.ezgiyilmaz.sporfinder.models.city
 import com.ezgiyilmaz.sporfinder.util.constants
 import com.ezgiyilmaz.sporfinder.viewModel.LocationPickerViewModel
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -49,11 +46,12 @@ class HomePage : AppCompatActivity() {
     private lateinit var rivalViewModel: PagingViewModel
     private lateinit var rivalAdapter: RivalAdapter
     private lateinit var locationPicker: LocationPickerViewModel
+
     private lateinit var toggle: ActionBarDrawerToggle
     var selected = ""
     val cal = Calendar.getInstance()
-    private  var db=FirebaseFirestore.getInstance()
-
+    private var db = FirebaseFirestore.getInstance()
+    var pagingSource= PagingSource(db, "oyuncuBul",1)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         println("HomePage başlatılıyor.")
@@ -103,28 +101,32 @@ class HomePage : AppCompatActivity() {
         showDatePicker()
         showTimePicker()
         category()
+        filterButon()
 
-        val headerview=binding.navView.getHeaderView(0)
-        val radiorival:RadioButton=headerview.findViewById(R.id.radioRival)
+        val headerview = binding.navView.getHeaderView(0)
+        val radiorival: RadioButton = headerview.findViewById(R.id.radioRival)
 
         radiorival.setOnCheckedChangeListener { buttonView, isChecked ->
-            if(isChecked){
-                selected="rival"
+            if (isChecked) {
+                selected = "rival"
                 fillListRival()
-            }else{
-                selected="player"
+            } else {
+                selected = "player"
                 fillList()
             }
         }
         GlobalScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
-                fillSpinner(constants.categories, binding.navView.findViewById(R.id.CategoryTextView))
+                fillSpinner(
+                    constants.categories,
+                    binding.navView.findViewById(R.id.CategoryTextView)
+                )
             }
         }
 
 
-
     }
+
     // Oyuncu listesini doldurur
     fun fillList() {
         println("Oyuncu listesi dolduruluyor.")
@@ -170,7 +172,7 @@ class HomePage : AppCompatActivity() {
                 ViewModelProvider(this@HomePage).get(LocationPickerViewModel::class.java)
             viewModel.getApiInterface()
             viewModel.getCity()
-            val cityList=viewModel.cityId
+            val cityList = viewModel.cityId
 
             Log.d("TAG", "viewModel.getCity(): " + cityList)
 
@@ -256,8 +258,8 @@ class HomePage : AppCompatActivity() {
 
     private fun showDatePicker() {
 
-        val headerView=binding.navView.getHeaderView(0)
-        val dateTextView:TextView=headerView.findViewById<TextView>(R.id.dateTextView)
+        val headerView = binding.navView.getHeaderView(0)
+        val dateTextView: TextView = headerView.findViewById<TextView>(R.id.dateTextView)
 
         dateTextView.setText(SimpleDateFormat("dd/MM/yyyy", Locale.US).format(cal.time))
 
@@ -269,30 +271,51 @@ class HomePage : AppCompatActivity() {
 
                 val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.US)
                 dateTextView.setText(sdf.format(cal.time))
+                val date = sdf.parse(dateTextView.text.toString())
+                if (date != null) {
+                    val timestamp = Timestamp(date)
+                    println("Timestamp: $timestamp")
+                }
             }
+
 
         dateTextView.setOnClickListener {
             val dialog = DatePickerDialog(
                 this, dateSetListener,
                 cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)
             )
+            if (dateTextView.text.isNotEmpty() && dateTextView.text != "dd/MM/yyyy") {
+                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+                dateTextView.setText(sdf.format(cal.time))
+            } else {
+                println("Tarih seçilmedi.")
+            }
+
+
+
             dialog.datePicker.minDate = Calendar.getInstance().timeInMillis
             dialog.show()
         }
+
     }
 
     private fun showTimePicker() {
 
-        val headerview=binding.navView.getHeaderView(0)
-        val timeTextView:TextView=headerview.findViewById(R.id.timeTextView)
+        val headerview = binding.navView.getHeaderView(0)
+        val timeTextView: TextView = headerview.findViewById(R.id.timeTextView)
         timeTextView.setOnClickListener {
             val timeSetListener = TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
                 cal.set(Calendar.HOUR_OF_DAY, hourOfDay)
                 cal.set(Calendar.MINUTE, minute)
-
-                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-                timeTextView.setText(timeFormat.format(cal.time))
             }
+
+            if (timeTextView.text.isNotEmpty()) {
+                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                timeTextView.text = timeFormat.format(cal.time)
+            } else {
+                println("saat seçilmedi")
+            }
+
 
             TimePickerDialog(
                 this, timeSetListener,
@@ -300,11 +323,13 @@ class HomePage : AppCompatActivity() {
                 cal.get(Calendar.MINUTE), true
             ).show() // 24 saat formatı için true parametresi
         }
+
+
     }
 
-    private fun category(){
-        val headerView=binding.navView.getHeaderView(0)
-        val categoryspinner:Spinner=headerView.findViewById(R.id.CategoryTextView)
+    private fun category() {
+        val headerView = binding.navView.getHeaderView(0)
+        val categoryspinner: Spinner = headerView.findViewById(R.id.CategoryTextView)
         categoryspinner.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
@@ -315,21 +340,21 @@ class HomePage : AppCompatActivity() {
                 ) {
 
                     val selectedCategory = parent.getItemAtPosition(position).toString()
-                    Log.d("TAG", "onItemSelected: "+selectedCategory)
+                    Log.d("TAG", "onItemSelected: " + selectedCategory)
                     println(selectedCategory)
                     GlobalScope.launch {
-                        withContext(Dispatchers.Main){
-                            var listof:List<String>
-                            if(selectedCategory=="Futbol"){
-                                listof=constants.positionFootball
-                            }else if (selectedCategory == "Basketbol") {
+                        withContext(Dispatchers.Main) {
+                            var listof: List<String>
+                            if (selectedCategory == "Futbol") {
+                                listof = constants.positionFootball
+                            } else if (selectedCategory == "Basketbol") {
                                 listof = constants.positionBasketball
                             } else if (selectedCategory == "Voleybol") {
                                 listof = constants.positionVoleyball
                             } else {
                                 listof = constants.positionTennis
                             }
-                            fillSpinner(listof,headerView.findViewById(R.id.lookingforSpinner))
+                            fillSpinner(listof, headerView.findViewById(R.id.lookingforSpinner))
                         }
                     }
 
@@ -341,11 +366,72 @@ class HomePage : AppCompatActivity() {
                 }
             }
     }
+
     suspend fun fillSpinner(list: List<String>, spinner: Spinner) {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, list)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
     }
 
+    suspend fun getFirebaseData(criteria: FilterCriteria): List<FilterCriteria> {
+        val query = db.collection("oyuncuBul")
+        if (criteria.category != null) {
+            query.whereEqualTo("category", criteria.category)
+        } else if (criteria.lookingFor != null) {
+            query.whereEqualTo("lookingFor", criteria.lookingFor)
+        } else if (criteria.dateTime != null) {
+            query.whereEqualTo("dateTime", criteria.dateTime)
+        } else if (criteria.city != null) {
+            query.whereEqualTo("city", criteria.city)
+        } else if (criteria.townShip != null) {
+            query.whereEqualTo("townShip", criteria.townShip)
+        }
+        val result = query.get().await()
+        Log.d("TAG", "getFirebaseData: " + result)
+        return result.toObjects(FilterCriteria::class.java) // dataclas tipine dönüştürmek için toObjects kullanılır
+
+    }
+
+    fun filterButon() {
+        val headerview = binding.navView.getHeaderView(0)
+        val filterbuton: Button = headerview.findViewById(R.id.filterButon)
+        val categorySpinner = headerview.findViewById<Spinner>(R.id.CategoryTextView)
+        val lookingforSpinner = headerview.findViewById<Spinner>(R.id.lookingforSpinner)
+        val dateTextview = headerview.findViewById<TextView>(R.id.dateTextView)
+        val timeTextview = headerview.findViewById<TextView>(R.id.timeTextView)
+        val cityTextview = headerview.findViewById<Spinner>(R.id.cityTextView)
+        val townshipsTextview = headerview.findViewById<Spinner>(R.id.townShipTextView)
+
+
+        filterbuton.setOnClickListener {
+            var timestamp : Timestamp? =null
+
+            if (dateTextview.text.isNotEmpty() && timeTextview.text.isNotEmpty()) {
+                timestamp = Timestamp(cal.time)
+            }
+            val criteria = FilterCriteria(
+                category = categorySpinner.selectedItem?.toString(),
+                lookingFor = lookingforSpinner.selectedItem?.toString(),
+                dateTime = timestamp,
+                city = cityTextview.selectedItem?.toString(),
+                townShip = townshipsTextview.selectedItem?.toString()
+
+            )
+            Log.d("TAG", "getFirebaseData: " + criteria)
+
+            GlobalScope.launch(Dispatchers.IO) {
+                val filterList = getFirebaseData(criteria)
+                withContext(Dispatchers.Main) {
+                    //recycler ı güncelleme
+                    //pagingSource.load2(criteria)
+
+                }
+            }
+        }
+    }
+
+    fun filterAdapter(list: List<FilterCriteria>) {
+
+    }
 
 }
