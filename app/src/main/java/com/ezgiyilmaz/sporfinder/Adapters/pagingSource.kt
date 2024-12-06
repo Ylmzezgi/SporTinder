@@ -1,13 +1,12 @@
 package com.ezgiyilmaz.sporfinder.Adapters
 
 import android.content.Intent
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.ezgiyilmaz.sporfinder.models.FilterCriteria
 import com.ezgiyilmaz.sporfinder.models.GetPlayerModel
 import com.ezgiyilmaz.sporfinder.models.GetRivalModel
-import com.ezgiyilmaz.sporfinder.pages.DetailPage
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
@@ -15,16 +14,50 @@ import kotlinx.coroutines.tasks.await
 class PagingSource(
     private val firestore: FirebaseFirestore,
     private val whichOne: String,
+    private val criteria: FilterCriteria,
     private val pageSize: Int = 1
-
 ) : PagingSource<Query, Any>() {
     override suspend fun load(params: LoadParams<Query>): LoadResult<Query, Any> {
         return try {
             // İlk sayfa için sorguyu oluştur
-            val currentQuery = params.key ?: firestore.collection(whichOne)
+            Log.d(
+                "Criteria",
+                "Criteria values: category=${criteria.category}, lookingFor=${criteria.lookingFor}, city=${criteria.city}, townShip=${criteria.townShip}"
+            )
+
+            var query = firestore.collection(whichOne)
+
                 .orderBy("dateTime", Query.Direction.DESCENDING)
                 .limit(pageSize.toLong())
-            println("currentQuery oluşturuldu: $currentQuery")
+
+
+            if (!criteria.category.isNullOrEmpty()) {
+                query=query.whereEqualTo("category", criteria.category)
+                Log.d("deneme", "category: " + query)
+
+            }
+
+                if (!criteria.lookingFor.isNullOrEmpty()) {
+                    query = query.whereEqualTo("lookingFor", criteria.lookingFor)
+                    Log.d("deneme", "lookingFor: " + query)
+
+                }
+
+
+
+            if (!criteria.city.isNullOrEmpty()) {
+                query= query.whereEqualTo("city", criteria.city)
+                Log.d("deneme", "city: " + query)
+
+            }
+            if (!criteria.townShip.isNullOrEmpty()) {
+                query=query.whereEqualTo("townShip", criteria.townShip)
+                Log.d("deneme", "township: " + query)
+
+            }
+
+
+            val currentQuery = params.key ?: query
 
             // Firestore sorgusunu çalıştır
             val snapshot = currentQuery.get().await()
@@ -60,17 +93,38 @@ class PagingSource(
 
                 }
 
-
             }
 
             // Sonraki sorguyu oluştur
-            val nextQuery = if (snapshot.size() < pageSize) {
+            var nextQuery = if (snapshot.size() < pageSize) {
                 null
             } else {
                 firestore.collection(whichOne)
                     .orderBy("dateTime", Query.Direction.DESCENDING)
                     .startAfter(snapshot.documents.last())
                     .limit(pageSize.toLong())
+
+            }
+
+            if (!criteria.category.isNullOrEmpty()) {
+                nextQuery=nextQuery?.whereEqualTo("category", criteria.category)
+                Log.d("deneme", "category: " + query)
+
+            }
+            if (!criteria.lookingFor.isNullOrEmpty()) {
+                nextQuery=nextQuery?.whereEqualTo("lookingFor", criteria.lookingFor)
+                Log.d("deneme", "lookingFor: " + query)
+
+            }
+
+            if (!criteria.city.isNullOrEmpty()) {
+                nextQuery= nextQuery?.whereEqualTo("city", criteria.city)
+                Log.d("deneme", "city: " + query)
+            }
+            if (!criteria.townShip.isNullOrEmpty()) {
+                nextQuery=nextQuery?.whereEqualTo("townShip", criteria.townShip)
+                Log.d("deneme", "township: " + query)
+
             }
             println("Sonraki sorgu (nextQuery): $nextQuery")
 
@@ -91,78 +145,5 @@ class PagingSource(
     override fun getRefreshKey(state: PagingState<Query, Any>): Query? {
         println("getRefreshKey çağrıldı, state: $state")
         return null
-    }
-    suspend fun load2(params: LoadParams<Query>,criteria: FilterCriteria,existingList: List<FilterCriteria>? = null): LoadResult<Query, Any> {
-        return try {
-            // İlk sayfa için sorguyu oluştur
-            val currentQuery = params.key ?: firestore.collection(whichOne)
-                .orderBy("dateTime", Query.Direction.DESCENDING)
-                .whereEqualTo("category",criteria.category)
-                .whereEqualTo("lookingFor",criteria.lookingFor)
-                .whereEqualTo("dateTime",criteria.dateTime)
-                .whereEqualTo("city",criteria.city)
-                .whereEqualTo("townShip",criteria.townShip)
-                .limit(pageSize.toLong())
-            println("currentQuery oluşturuldu: $currentQuery")
-
-            // Firestore sorgusunu çalıştır
-            val snapshot = currentQuery.get().await()
-            println("Snapshot getirildi: ${snapshot.documents.size} belge alındı")
-
-            // Belgeleri veri modellerine dönüştür
-            val player= snapshot.documents.map { document ->
-
-                // Belgeleri veri modellerine dönüştür
-                if (whichOne == "oyuncuBul") {
-                    FilterCriteria(
-
-                        category = document.getString("category") ?: "",
-                        lookingFor = document.getString("lookingFor")?:"",
-                        dateTime = document.getTimestamp("dateTime"),
-                        city = document.getString("city") ?: "",
-                        townShip = document.getString("townShip") ?: "",
-                    )
-
-                } else {
-                    GetRivalModel(
-                        id = document.id,
-                        category = document.getString("category") ?: "",
-                        city = document.getString("city") ?: "",
-                        dateTime = document.getTimestamp("dateTime"),
-                        townShip = document.getString("townShip") ?: "",
-                        note = document.getString("note") ?: "",
-                        userid = document.getString("userid") ?: ""
-                    )
-                }
-                }
-
-            // Sonraki sorguyu oluştur
-            val nextQuery = if (snapshot.size() < pageSize) {
-                null
-            } else {
-                firestore.collection(whichOne)
-                    .orderBy("dateTime", Query.Direction.DESCENDING)
-                    .startAfter(snapshot.documents.last())
-                    .whereEqualTo("category",criteria.category)
-                    .whereEqualTo("lookingFor",criteria.lookingFor)
-                    .whereEqualTo("dateTime",criteria.dateTime)
-                    .whereEqualTo("city",criteria.city)
-                    .whereEqualTo("townShip",criteria.townShip)
-                    .limit(pageSize.toLong())
-            }
-            println("Sonraki sorgu (nextQuery): $nextQuery")
-
-            LoadResult.Page(
-                data = player,
-                prevKey = null,  // Firestore'da önceki sayfa desteği genellikle kullanılmaz
-                nextKey = nextQuery
-            ).also {
-                println("LoadResult.Page oluşturuldu, veri boyutu: ${player.size}")
-            }
-        } catch (e: Exception) {
-            println("Hata oluştu: ${e.message}")
-            LoadResult.Error(e)
-        }
-
     }
 }

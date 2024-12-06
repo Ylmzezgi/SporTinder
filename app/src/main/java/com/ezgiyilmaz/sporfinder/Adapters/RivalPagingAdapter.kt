@@ -1,6 +1,5 @@
 import android.content.Intent
-import android.graphics.ColorSpace.match
-import android.util.Log
+
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
@@ -8,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ezgiyilmaz.sporfinder.R
 import com.ezgiyilmaz.sporfinder.databinding.ListitemBinding
+import com.ezgiyilmaz.sporfinder.models.FilterCriteria
 import com.ezgiyilmaz.sporfinder.models.GetPlayerModel
 import com.ezgiyilmaz.sporfinder.models.GetRivalModel
 import com.ezgiyilmaz.sporfinder.pages.DetailPage
@@ -19,7 +19,6 @@ class RivalAdapter : PagingDataAdapter<Any, RivalAdapter.MovieViewHolder>(MOVIE_
         val binding = ListitemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return MovieViewHolder(binding)
     }
-
     override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
         val match = getItem(position)
         if (match != null) {
@@ -48,7 +47,6 @@ class RivalAdapter : PagingDataAdapter<Any, RivalAdapter.MovieViewHolder>(MOVIE_
             if (match is GetRivalModel) {
                 println("GetRivalModel bulundu: ${match.category}")
                 category = match.category
-
                 binding.playItemTextview.text = match.category
                 binding.locationItemTextView.text = match.city
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
@@ -63,7 +61,6 @@ class RivalAdapter : PagingDataAdapter<Any, RivalAdapter.MovieViewHolder>(MOVIE_
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
                 val formattedDate = dateFormat.format(match.dateTime!!.toDate())
                 binding.dateItemTextView.text = formattedDate
-
             }
 
             // Kategoriye göre görsel ayarlama
@@ -94,12 +91,8 @@ class RivalAdapter : PagingDataAdapter<Any, RivalAdapter.MovieViewHolder>(MOVIE_
                 else -> {
                     println("Kategori tanınmadı")
                 }
-
             }
-
-
         }
-
     }
 
     companion object {
@@ -113,11 +106,8 @@ class RivalAdapter : PagingDataAdapter<Any, RivalAdapter.MovieViewHolder>(MOVIE_
                     newItem as GetPlayerModel
                     oldItem.id == newItem.id
                 }
-                Log.d("TAG", "areItemsTheSame: "+result)
-                println("areItemsTheSame sonucu: $result")
                 return result
             }
-
             override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean {
                 val result = if (oldItem is GetRivalModel) {
                     newItem as GetRivalModel
@@ -127,7 +117,6 @@ class RivalAdapter : PagingDataAdapter<Any, RivalAdapter.MovieViewHolder>(MOVIE_
                     newItem as GetPlayerModel
                     oldItem == newItem
                 }
-                println("areContentsTheSame sonucu: $result")
                 return result
             }
         }
