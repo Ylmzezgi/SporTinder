@@ -20,6 +20,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,15 +28,16 @@ import com.ezgiyilmaz.sporfinder.Adapters.PagingSource
 import com.ezgiyilmaz.sporfinder.R
 import com.ezgiyilmaz.sporfinder.databinding.ActivityHomePageBinding
 import com.ezgiyilmaz.sporfinder.models.FilterCriteria
+import com.ezgiyilmaz.sporfinder.models.rivalModel
 import com.ezgiyilmaz.sporfinder.util.constants
 import com.ezgiyilmaz.sporfinder.viewModel.LocationPickerViewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -46,12 +48,13 @@ class HomePage : AppCompatActivity() {
     private lateinit var rivalViewModel: PagingViewModel
     private lateinit var rivalAdapter: RivalAdapter
     private lateinit var locationPicker: LocationPickerViewModel
-
+    private lateinit var query: Query
     private lateinit var toggle: ActionBarDrawerToggle
     var selected = ""
+    var criteria = FilterCriteria()
+
     val cal = Calendar.getInstance()
     private var db = FirebaseFirestore.getInstance()
-    var pagingSource= PagingSource(db, "oyuncuBul",1)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         println("HomePage başlatılıyor.")
@@ -63,7 +66,7 @@ class HomePage : AppCompatActivity() {
 
         locationPicker = ViewModelProvider(this).get(LocationPickerViewModel::class.java)
         locationPicker.getApiInterface()
-
+        query = db.collection("oyuncuBul")
         setAdapter()
         fillList()
         toggle = ActionBarDrawerToggle(
@@ -77,6 +80,7 @@ class HomePage : AppCompatActivity() {
         binding.main.addDrawerListener(toggle)
         toggle.syncState()
 
+
         // matchList()
         enableEdgeToEdge()
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -84,17 +88,20 @@ class HomePage : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
         // RadioButton dinleyicisi ayarlanıyor
         binding.radioRival.setOnCheckedChangeListener { _, isChecked ->
-            println("RadioButton durumu değiştirildi. Seçili: ${if (isChecked) "rival" else "player"}")
             setAdapter()
+            println("RadioButton durumu değiştirildi. Seçili: ${if (isChecked) "rival" else "player"}")
+            query = db.collection("oyuncuBul")
             if (isChecked) {
-                selected = "rival"
-                fillListRival()
-            } else {
+                criteria = FilterCriteria()
                 selected = "player"
                 fillList()
+
+            } else {
+                criteria = FilterCriteria()
+                selected = "rival"
+                fillListRival()
             }
         }
         fillCitvAndTownships()
@@ -105,14 +112,20 @@ class HomePage : AppCompatActivity() {
 
         val headerview = binding.navView.getHeaderView(0)
         val radiorival: RadioButton = headerview.findViewById(R.id.radioRival)
+        val lookingforSpinner: Spinner = headerview.findViewById(R.id.lookingforSpinner)
+
 
         radiorival.setOnCheckedChangeListener { buttonView, isChecked ->
+            setAdapter()
             if (isChecked) {
+                criteria = FilterCriteria()
                 selected = "rival"
-                fillListRival()
+
+                lookingforSpinner.isEnabled = false
             } else {
+                criteria = FilterCriteria()
                 selected = "player"
-                fillList()
+                lookingforSpinner.isEnabled = true
             }
         }
         GlobalScope.launch(Dispatchers.IO) {
@@ -127,23 +140,29 @@ class HomePage : AppCompatActivity() {
 
     }
 
+
+
     // Oyuncu listesini doldurur
     fun fillList() {
         println("Oyuncu listesi dolduruluyor.")
         lifecycleScope.launch {
-            rivalViewModel.playerPagingData.collectLatest {
-                println("Oyuncu listesi güncelleniyor.")
+            val playerResult = rivalViewModel.pagingData(criteria, selected)
+            println("Oyuncu listesi güncelleniyor.")
+            playerResult.collectLatest {
                 rivalAdapter.submitData(it)
             }
         }
+
     }
 
     // Rakip listesini doldurur
     fun fillListRival() {
         println("Rakip listesi dolduruluyor.")
         lifecycleScope.launch {
-            rivalViewModel.rivalPagingData.collectLatest {
-                println("Rakip listesi güncelleniyor.")
+            rivalAdapter
+            val playerResult = rivalViewModel.pagingData(criteria, selected)
+            println("Oyuncu listesi güncelleniyor.")
+            playerResult.collectLatest {
                 rivalAdapter.submitData(it)
             }
         }
@@ -152,13 +171,14 @@ class HomePage : AppCompatActivity() {
 
     // RecyclerView adaptörünü ayarlar
     fun setAdapter() {
+
         println("RecyclerView adaptörü ayarlanıyor.")
         rivalAdapter = RivalAdapter()
-
         // RecyclerView ayarları
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this@HomePage)
             adapter = rivalAdapter
+
         }
         println("RecyclerView adaptörü ayarlandı.")
     }
@@ -373,23 +393,38 @@ class HomePage : AppCompatActivity() {
         spinner.adapter = adapter
     }
 
-    suspend fun getFirebaseData(criteria: FilterCriteria): List<FilterCriteria> {
-        val query = db.collection("oyuncuBul")
-        if (criteria.category != null) {
-            query.whereEqualTo("category", criteria.category)
-        } else if (criteria.lookingFor != null) {
-            query.whereEqualTo("lookingFor", criteria.lookingFor)
-        } else if (criteria.dateTime != null) {
-            query.whereEqualTo("dateTime", criteria.dateTime)
-        } else if (criteria.city != null) {
-            query.whereEqualTo("city", criteria.city)
-        } else if (criteria.townShip != null) {
-            query.whereEqualTo("townShip", criteria.townShip)
-        }
-        val result = query.get().await()
-        Log.d("TAG", "getFirebaseData: " + result)
-        return result.toObjects(FilterCriteria::class.java) // dataclas tipine dönüştürmek için toObjects kullanılır
+    fun getFirebaseData(criteria: FilterCriteria) {
+        if (selected == "rival") {
+            query = db.collection("rakipBul")
+            Log.d("deneme", "rival: " + query)
 
+
+        } else {
+            query = db.collection("oyuncuBul")
+            Log.d("deneme", "else içi: " + query)
+
+
+        }
+        if (criteria.category != null) {
+            query = query.whereEqualTo("category", criteria.category)
+            Log.d("deneme", "category: " + query)
+
+        }
+        if (criteria.lookingFor != null) {
+            query = query.whereEqualTo("lookingFor", criteria.lookingFor)
+            Log.d("deneme", "lookingFor: " + query)
+        }
+
+        if (criteria.city != null) {
+            query = query.whereEqualTo("city", criteria.city)
+            Log.d("deneme", "city: " + query)
+
+        }
+        if (criteria.townShip != null) {
+            query = query.whereEqualTo("townShip", criteria.townShip)
+            Log.d("deneme", "township: " + query)
+
+        }
     }
 
     fun filterButon() {
@@ -402,36 +437,37 @@ class HomePage : AppCompatActivity() {
         val cityTextview = headerview.findViewById<Spinner>(R.id.cityTextView)
         val townshipsTextview = headerview.findViewById<Spinner>(R.id.townShipTextView)
 
-
         filterbuton.setOnClickListener {
-            var timestamp : Timestamp? =null
+            var timestamp: Timestamp? = null
 
             if (dateTextview.text.isNotEmpty() && timeTextview.text.isNotEmpty()) {
                 timestamp = Timestamp(cal.time)
             }
-            val criteria = FilterCriteria(
-                category = categorySpinner.selectedItem?.toString(),
-                lookingFor = lookingforSpinner.selectedItem?.toString(),
-                dateTime = timestamp,
-                city = cityTextview.selectedItem?.toString(),
-                townShip = townshipsTextview.selectedItem?.toString()
-
-            )
-            Log.d("TAG", "getFirebaseData: " + criteria)
-
-            GlobalScope.launch(Dispatchers.IO) {
-                val filterList = getFirebaseData(criteria)
-                withContext(Dispatchers.Main) {
-                    //recycler ı güncelleme
-                    //pagingSource.load2(criteria)
-
-                }
+            if (selected == "oyuncuBul") {
+                criteria = FilterCriteria(
+                    category = categorySpinner.selectedItem?.toString(),
+                    lookingFor = lookingforSpinner.selectedItem?.toString(),
+                    dateTime = timestamp,
+                    city = cityTextview.selectedItem?.toString(),
+                    townShip = townshipsTextview.selectedItem?.toString()
+                )
+                getFirebaseData(criteria)
+            } else {
+                selected = "rakipBul"
+                criteria = FilterCriteria(
+                    category = categorySpinner.selectedItem?.toString(),
+                    dateTime = timestamp,
+                    city = cityTextview.selectedItem?.toString(),
+                    townShip = townshipsTextview.selectedItem?.toString()
+                )
+                getFirebaseData(criteria)
+            }
+            Log.d("deneme", "getFirebaseData: " + criteria)
+            if (selected == "rival") {
+                fillListRival()
+            } else {
+                fillList()
             }
         }
     }
-
-    fun filterAdapter(list: List<FilterCriteria>) {
-
-    }
-
 }
