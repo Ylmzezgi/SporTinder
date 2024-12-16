@@ -2,8 +2,10 @@ package com.ezgiyilmaz.sporfinder.pages
 
 import PagingViewModel
 import RivalAdapter
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -40,6 +42,9 @@ class DetailPage : AppCompatActivity() {
                 println("oyuncu Bul" + document)
                 if (document != null) {
                     val player = document.toObject(GetPlayerModel::class.java)
+                    val matchCreatorId = document.getString("creatorId") ?: ""
+                    intent.putExtra("matchCreatorId",matchCreatorId)
+                    Log.d("document", "onCreate: " +matchCreatorId)
                     category = player!!.category
                     binding.categoryDetailTextView.text = player?.category
                     binding.dateTimeDetailTextView.text =
@@ -119,6 +124,13 @@ class DetailPage : AppCompatActivity() {
             else -> {
                 println("Kategori tanınmadı")
             }
+        }
+    }
+
+    fun messageClick(view:View){
+        Intent(this,MessagesPage::class.java).also {
+
+            startActivity(intent)
         }
     }
 }

@@ -76,12 +76,8 @@ class HomePage : AppCompatActivity() {
             R.string.open_nav,
             R.string.close_nav
         )
-
         binding.main.addDrawerListener(toggle)
         toggle.syncState()
-
-
-        // matchList()
         enableEdgeToEdge()
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -139,8 +135,6 @@ class HomePage : AppCompatActivity() {
 
 
     }
-
-
 
     // Oyuncu listesini doldurur
     fun fillList() {
@@ -271,7 +265,7 @@ class HomePage : AppCompatActivity() {
     }
 
     fun imageOnClick(view: View) {
-        val intent = Intent(this, CreateMatchPage::class.java)
+        val intent = Intent(this, LoginPage::class.java)
         startActivity(intent)
 
     }
