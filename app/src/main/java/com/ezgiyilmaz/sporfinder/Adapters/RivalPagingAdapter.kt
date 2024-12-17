@@ -1,4 +1,5 @@
 import android.content.Intent
+import android.util.Log
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -29,9 +30,11 @@ class RivalAdapter : PagingDataAdapter<Any, RivalAdapter.MovieViewHolder>(MOVIE_
                 val intent = Intent(context, DetailPage::class.java).apply {
                     if (match is GetPlayerModel) {
                         putExtra("playerId", match.id)
+                        putExtra("matchCreatorId",match.userid)
                     } else {
                         match as GetRivalModel
                         putExtra("rivalId", match.id)
+                        putExtra("matchCreatorId",match.userid)
                     }
                 }
                 context.startActivity(intent)
@@ -55,6 +58,7 @@ class RivalAdapter : PagingDataAdapter<Any, RivalAdapter.MovieViewHolder>(MOVIE_
             } else {
                 match as GetPlayerModel
                 println("GetPlayerModel bulundu: ${match.category}")
+                Log.d("adapterplayer61", "bind: getplayerbulundu "+match.category)
                 category = match.category
                 binding.playItemTextview.text = match.category
                 binding.locationItemTextView.text = match.city

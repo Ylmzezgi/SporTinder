@@ -17,7 +17,7 @@ class PagingViewModel : ViewModel() {
 
 
     fun pagingData(criteria:FilterCriteria,whicOne:String): Flow<PagingData<Any>> {
-        if (whicOne=="oyuncuBul"){
+        if (whicOne=="player"){
              val playerPagingData: Flow<PagingData<Any>> = Pager(
 
                 config = PagingConfig(

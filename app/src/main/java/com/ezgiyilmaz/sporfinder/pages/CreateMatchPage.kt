@@ -207,8 +207,6 @@ class CreateMatchPage : AppCompatActivity() {
         val townShip = binding.townShipTextView.selectedItem.toString()
         val note = binding.noteEditText.text.toString()
 
-println(time)
-
         GlobalScope.launch(Dispatchers.IO) {
             val result = createMatchViewModel.saveViewModel(
                 selected,
