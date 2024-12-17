@@ -1,30 +1,19 @@
 package com.ezgiyilmaz.sporfinder.pages
 
-import PagingViewModel
-import RivalAdapter
+
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.ezgiyilmaz.sporfinder.Adapters.PagingSource
 import com.ezgiyilmaz.sporfinder.R
 import com.ezgiyilmaz.sporfinder.databinding.ActivityDetailPageBinding
 import com.ezgiyilmaz.sporfinder.models.GetPlayerModel
 import com.ezgiyilmaz.sporfinder.models.GetRivalModel
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import javax.crypto.EncryptedPrivateKeyInfo
 
 class DetailPage : AppCompatActivity() {
     private lateinit var binding: ActivityDetailPageBinding
@@ -34,17 +23,19 @@ class DetailPage : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailPageBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val matchid = intent.getStringExtra("playerId")
-        val rivalId = intent.getStringExtra("rivalId")
+
+        var matchid = intent.getStringExtra("playerId")
+        var rivalId = intent.getStringExtra("rivalId")
+        val matchCreatorId=intent.getStringExtra("matchCreatorId")
+
 
         try {
             db.collection("oyuncuBul").document(matchid!!).get().addOnSuccessListener { document ->
                 println("oyuncu Bul" + document)
                 if (document != null) {
                     val player = document.toObject(GetPlayerModel::class.java)
-                    val matchCreatorId = document.getString("creatorId") ?: ""
-                    intent.putExtra("matchCreatorId",matchCreatorId)
-                    Log.d("document", "onCreate: " +matchCreatorId)
+
+
                     category = player!!.category
                     binding.categoryDetailTextView.text = player?.category
                     binding.dateTimeDetailTextView.text =
@@ -69,8 +60,9 @@ class DetailPage : AppCompatActivity() {
 
                 if (document != null) {
                     println("rakip bul documneti 2 = " + document)
-
                     val rival = document.toObject(GetRivalModel::class.java)
+                    val matchIdRival = document.id
+                    Log.d("documentid", "onCreate: documnetid"+matchIdRival)
                     println("rakip bul rival = " + rival)
 
                     category = rival!!.category
@@ -80,7 +72,6 @@ class DetailPage : AppCompatActivity() {
                     binding.cityDetailTextView.text = "İl : " + rival?.city
                     binding.townShipDetailTextView.text = "İlçe : " + rival?.townShip
                     binding.noteDetailTextView.text = "Not " + rival?.note
-
                     getImage()
 
                 }
@@ -89,12 +80,20 @@ class DetailPage : AppCompatActivity() {
             e
         }
 
-
         enableEdgeToEdge()
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        binding.messageButton.setOnClickListener{
+            val intent = Intent(this, MessagesPage::class.java).apply {
+              putExtra("rivalId", rivalId)
+                putExtra("matchCreatorId",matchCreatorId)
+            }
+            startActivity(intent)
+
         }
     }
 
@@ -124,13 +123,6 @@ class DetailPage : AppCompatActivity() {
             else -> {
                 println("Kategori tanınmadı")
             }
-        }
-    }
-
-    fun messageClick(view:View){
-        Intent(this,MessagesPage::class.java).also {
-
-            startActivity(intent)
         }
     }
 }

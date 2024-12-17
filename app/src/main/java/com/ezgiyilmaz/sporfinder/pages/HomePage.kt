@@ -15,6 +15,7 @@ import android.widget.Button
 import android.widget.RadioButton
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -50,7 +51,7 @@ class HomePage : AppCompatActivity() {
     private lateinit var locationPicker: LocationPickerViewModel
     private lateinit var query: Query
     private lateinit var toggle: ActionBarDrawerToggle
-    var selected = ""
+    var selected = "player"
     var criteria = FilterCriteria()
 
     val cal = Calendar.getInstance()
@@ -66,7 +67,7 @@ class HomePage : AppCompatActivity() {
 
         locationPicker = ViewModelProvider(this).get(LocationPickerViewModel::class.java)
         locationPicker.getApiInterface()
-        query = db.collection("oyuncuBul")
+       // query = db.collection("oyuncuBul")
         setAdapter()
         fillList()
         toggle = ActionBarDrawerToggle(
@@ -88,16 +89,17 @@ class HomePage : AppCompatActivity() {
         binding.radioRival.setOnCheckedChangeListener { _, isChecked ->
             setAdapter()
             println("RadioButton durumu değiştirildi. Seçili: ${if (isChecked) "rival" else "player"}")
-            query = db.collection("oyuncuBul")
+          //  query = db.collection("oyuncuBul")
+
             if (isChecked) {
                 criteria = FilterCriteria()
-                selected = "player"
+                selected = "rival"
                 fillList()
 
             } else {
                 criteria = FilterCriteria()
-                selected = "rival"
-                fillListRival()
+                selected = "player"
+                fillList()
             }
         }
         fillCitvAndTownships()
@@ -140,6 +142,7 @@ class HomePage : AppCompatActivity() {
     fun fillList() {
         println("Oyuncu listesi dolduruluyor.")
         lifecycleScope.launch {
+            rivalAdapter
             val playerResult = rivalViewModel.pagingData(criteria, selected)
             println("Oyuncu listesi güncelleniyor.")
             playerResult.collectLatest {
@@ -150,17 +153,17 @@ class HomePage : AppCompatActivity() {
     }
 
     // Rakip listesini doldurur
-    fun fillListRival() {
-        println("Rakip listesi dolduruluyor.")
-        lifecycleScope.launch {
-            rivalAdapter
-            val playerResult = rivalViewModel.pagingData(criteria, selected)
-            println("Oyuncu listesi güncelleniyor.")
-            playerResult.collectLatest {
-                rivalAdapter.submitData(it)
-            }
-        }
-    }
+//    fun fillListRival() {
+//        println("Rakip listesi dolduruluyor.")
+//        lifecycleScope.launch {
+//            rivalAdapter
+//            val playerResult = rivalViewModel.pagingData(criteria, selected)
+//            println("Oyuncu listesi güncelleniyor.")
+//            playerResult.collectLatest {
+//                rivalAdapter.submitData(it)
+//            }
+//        }
+//    }
 
 
     // RecyclerView adaptörünü ayarlar
@@ -458,7 +461,7 @@ class HomePage : AppCompatActivity() {
             }
             Log.d("deneme", "getFirebaseData: " + criteria)
             if (selected == "rival") {
-                fillListRival()
+                fillList()
             } else {
                 fillList()
             }

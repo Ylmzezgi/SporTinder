@@ -1,5 +1,6 @@
 package com.ezgiyilmaz.sporfinder.models
 
+import com.ezgiyilmaz.sporfinder.viewModel.CreateMatchViewModel
 import com.google.firebase.Timestamp
 
 data class playerModel(

@@ -69,7 +69,6 @@ class PagingSource(
 
                 if (whichOne == "oyuncuBul") {
                     GetPlayerModel(
-
                         id = document.id,
                         category = document.getString("category") ?: "",
                         city = document.getString("city") ?: "",
