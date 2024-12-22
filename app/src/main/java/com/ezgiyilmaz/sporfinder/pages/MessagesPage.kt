@@ -1,56 +1,59 @@
 package com.ezgiyilmaz.sporfinder.pages
 
-import android.content.Intent
 import android.os.Bundle
-import android.os.Message
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ReportFragment.Companion.reportFragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.ezgiyilmaz.sporfinder.Adapters.MessagesAdapter
-import com.ezgiyilmaz.sporfinder.R
-import com.ezgiyilmaz.sporfinder.databinding.ActivityHomePageBinding
 import com.ezgiyilmaz.sporfinder.databinding.ActivityMessagesPageBinding
 import com.ezgiyilmaz.sporfinder.models.Messages
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+
 class MessagesPage : AppCompatActivity() {
     private lateinit var binding: ActivityMessagesPageBinding
     private var db = FirebaseFirestore.getInstance()
     private lateinit var auth: FirebaseAuth
     private lateinit var messageAdapter: MessagesAdapter
-    private val messages=ArrayList<Messages>()
+    private val messages = ArrayList<Messages>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMessagesPageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         enableEdgeToEdge()
+        auth=FirebaseAuth.getInstance()
+        val matchid = intent.getStringExtra("rivalId") ?: ""
+        val matchCreatorId = intent.getStringExtra("creatorUserId") ?: ""
+        Log.d("matchCreatorId", "onCreate: matchcreatorıd" + matchCreatorId)
+        val senderId = auth.currentUser!!.uid
+        val conversationId = getConversationId(senderId, matchCreatorId)
+        Log.d("TAG", "matchİdMessgePage: " + matchid)
 
         binding.messagesRecyclerView.layoutManager = LinearLayoutManager(this)
-        messageAdapter = MessagesAdapter(messages)
-        binding.messagesRecyclerView.adapter=messageAdapter
+        messageAdapter = MessagesAdapter(messages,senderId)
+        binding.messagesRecyclerView.adapter = messageAdapter
+        auth = FirebaseAuth.getInstance()
 
 
-
-        val matchCreatorId = intent.getStringExtra("matchCreatorId") ?: ""
-        val matchid = intent.getStringExtra("rivalId") ?: ""
-
-        Log.d("TAG", "matchİdMessgePage: "+matchid)
         binding.sendButton.setOnClickListener {
-            sendMessage(matchCreatorId,matchid)
+            sendMessage(matchCreatorId,senderId, conversationId)
         }
     }
 
-    private fun sendMessage(matchCreatorId: String, matchId: String) {
-        auth = FirebaseAuth.getInstance()
-        val currentUser = auth.currentUser
+    fun getConversationId(senderId: String, matchCreatorId: String): String {
+        return if (senderId < matchCreatorId) {
+            "$senderId$matchCreatorId"
+        } else {
+            "$matchCreatorId$senderId"
+        }
+    }
+
+
+    private fun sendMessage(matchCreatorId: String,senderId: String, conversationId: String) {
 
         val messageEditText = binding.messageEditText.text.toString().trim()
 
@@ -59,21 +62,24 @@ class MessagesPage : AppCompatActivity() {
             return
         }
 
-
-
-       val message = Messages(
-            userId = currentUser!!.uid,
-            sendId = currentUser!!.uid,
-            matchId = matchId,
-            messages = messageEditText
+        val message = Messages(
+            receiver =matchCreatorId,
+            sendId = senderId,
+            messages = messageEditText,
+            timestamp = Timestamp.now()
         )
-        db.collection("messages").add(message).addOnSuccessListener {
-            Toast.makeText(this, "Mesaj gönderildi!", Toast.LENGTH_LONG).show()
-            binding.messageEditText.text.clear()
-            messages.add(message)
-            messageAdapter.notifyDataSetChanged()
-        }.addOnFailureListener {
-            Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
-        }
+
+        db.collection("chats").document(conversationId)
+            .collection("chat")
+            .add(message).addOnSuccessListener {
+                Toast.makeText(this, "Mesaj gönderildi!", Toast.LENGTH_LONG).show()
+
+                binding.messageEditText.text.clear()
+                messages.add(message)
+                messageAdapter.notifyDataSetChanged()
+            }.addOnFailureListener {
+                Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
+            }
     }
+
 }

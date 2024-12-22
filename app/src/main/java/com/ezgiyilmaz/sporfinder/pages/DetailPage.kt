@@ -26,16 +26,17 @@ class DetailPage : AppCompatActivity() {
 
         var matchid = intent.getStringExtra("playerId")
         var rivalId = intent.getStringExtra("rivalId")
-        val matchCreatorId=intent.getStringExtra("matchCreatorId")
-
-
         try {
             db.collection("oyuncuBul").document(matchid!!).get().addOnSuccessListener { document ->
                 println("oyuncu Bul" + document)
                 if (document != null) {
                     val player = document.toObject(GetPlayerModel::class.java)
+                    val creatorUserId = player!!.userid
+                    println("Maçı oluşturan kişinin ID'si: $creatorUserId")
 
 
+                    intent.putExtra("creatorUserId", creatorUserId)
+                    Log.d("creatorUserId", "onCreate:Maçı oluşturan kişinin ID'si " + creatorUserId)
                     category = player!!.category
                     binding.categoryDetailTextView.text = player?.category
                     binding.dateTimeDetailTextView.text =
@@ -62,7 +63,7 @@ class DetailPage : AppCompatActivity() {
                     println("rakip bul documneti 2 = " + document)
                     val rival = document.toObject(GetRivalModel::class.java)
                     val matchIdRival = document.id
-                    Log.d("documentid", "onCreate: documnetid"+matchIdRival)
+                    Log.d("documentid", "onCreate: documnetid" + matchIdRival)
                     println("rakip bul rival = " + rival)
 
                     category = rival!!.category
@@ -87,12 +88,25 @@ class DetailPage : AppCompatActivity() {
             insets
         }
 
-        binding.messageButton.setOnClickListener{
-            val intent = Intent(this, MessagesPage::class.java).apply {
-              putExtra("rivalId", rivalId)
-                putExtra("matchCreatorId",matchCreatorId)
-            }
-            startActivity(intent)
+        binding.messageButton.setOnClickListener {
+            db.collection("oyuncuBul").document(matchid!!).get().addOnSuccessListener {document->
+                println("oyuncu Bul" + document)
+                if (document != null) {
+                    val player = document.toObject(GetPlayerModel::class.java)
+                    val creatorUserId = player!!.userid
+                    println("Maçı oluşturan kişinin ID'si: $creatorUserId")
+
+                    val intent = Intent(this, MessagesPage::class.java).apply {
+                        putExtra("rivalId", rivalId)
+                        putExtra("creatorUserId", creatorUserId)
+                        Log.d("creatorUserId", "onCreate:creatorUserId " + creatorUserId)
+
+                    }
+                    startActivity(intent)
+
+                }
+
+        }
 
         }
     }
