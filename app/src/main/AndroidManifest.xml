@@ -17,6 +17,9 @@
         android:theme="@style/Theme.SporFinder"
         tools:targetApi="31">
         <activity
+            android:name=".pages.ChatsPage"
+            android:exported="false" />
+        <activity
             android:name=".pages.MessagesPage"
             android:exported="false" />
         <activity
