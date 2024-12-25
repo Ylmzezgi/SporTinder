@@ -9,20 +9,17 @@
 <LinearLayout
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/edittextstyle"
-    android:backgroundTint="@color/chat_color_sender"
     android:padding="8dp"
     android:layout_marginEnd="80dp"
-    android:id="@+id/left_chat_layout"
-    >
+    android:id="@+id/left_chat_layout">
 
     <TextView
         android:id="@+id/left_chat_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:text="Name"
-        android:textColor="@color/white"
+        android:text="text"
+        android:textColor="@color/black"
         android:textSize="18sp" />
 
 </LinearLayout>
@@ -30,7 +27,6 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/edittextstyle"
         android:backgroundTint="@color/chat_color_RECEİVER"
         android:layout_alignParentEnd="true"
         android:padding="8dp"
@@ -44,8 +40,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:text="Name"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
+            android:text="text"
+            android:textAlignment="textEnd"
             android:textSize="18sp" />
 
     </LinearLayout>
