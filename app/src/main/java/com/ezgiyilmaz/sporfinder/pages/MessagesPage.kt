@@ -9,8 +9,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ezgiyilmaz.sporfinder.Adapters.MessagesAdapter
 import com.ezgiyilmaz.sporfinder.databinding.ActivityMessagesPageBinding
 import com.ezgiyilmaz.sporfinder.models.Messages
+import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -35,6 +37,7 @@ class MessagesPage : AppCompatActivity() {
 
         val senderId = auth.currentUser!!.uid
         val conversationId = getConversationId(senderId, matchCreatorId)
+        intent.putExtra("persons",conversationId)
 
         Log.d("TAG", "matchİdMessgePage: " + matchid)
 
@@ -46,6 +49,22 @@ class MessagesPage : AppCompatActivity() {
 
         binding.sendButton.setOnClickListener {
             sendMessage(matchCreatorId, senderId, conversationId)
+        }
+        if(senderId!=null){
+        db.collection("user").document(senderId).get().addOnSuccessListener { document->
+            if(document!=null) {
+                val name = document.getString("name")
+                binding.nameTextView.text = name
+            }
+            }
+        }
+
+        val user=Firebase.auth.currentUser
+        user?.let {
+            val name=it.displayName
+            binding.nameTextView.text=name
+            println(name)
+
         }
     }
 

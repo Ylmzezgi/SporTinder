@@ -1,5 +1,7 @@
 package com.ezgiyilmaz.sporfinder.Adapters
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,7 +32,7 @@ class MessagesAdapter(val messageList: List<Messages>, private val currentUserId
         } else {
             holder.messagesItemBinding.leftChatTextview.text = message.messages
             holder.messagesItemBinding.leftChatTextview.visibility = View.VISIBLE
-            holder.messagesItemBinding.leftChatTextview.visibility = View.GONE
+            holder.messagesItemBinding.rightChatTextview.visibility = View.GONE
         }
     }
 

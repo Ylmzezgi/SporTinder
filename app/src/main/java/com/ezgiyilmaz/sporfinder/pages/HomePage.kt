@@ -33,6 +33,7 @@ import com.ezgiyilmaz.sporfinder.models.rivalModel
 import com.ezgiyilmaz.sporfinder.util.constants
 import com.ezgiyilmaz.sporfinder.viewModel.LocationPickerViewModel
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +52,7 @@ class HomePage : AppCompatActivity() {
     private lateinit var locationPicker: LocationPickerViewModel
     private lateinit var query: Query
     private lateinit var toggle: ActionBarDrawerToggle
+    private var auth=FirebaseAuth.getInstance()
     var selected = "player"
     var criteria = FilterCriteria()
 
@@ -268,8 +270,18 @@ class HomePage : AppCompatActivity() {
     }
 
     fun imageOnClick(view: View) {
-        val intent = Intent(this, LoginPage::class.java)
+        val intent = Intent(this, ChatsPage::class.java)
         startActivity(intent)
+
+    }
+    fun image4OnClick(view: View) {
+        val user=auth.currentUser!!.uid
+        if(user!=null) {
+            val intent = Intent(this, LoginPage::class.java)
+            startActivity(intent)
+        }else{
+            Toast.makeText(this,"Başka bir hesapla giriş yapmak için önce çıkış yapmanız gerekiyor!!!",Toast.LENGTH_LONG).show()
+        }
 
     }
 

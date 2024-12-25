@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -13,19 +14,24 @@ import com.ezgiyilmaz.sporfinder.R
 import com.ezgiyilmaz.sporfinder.databinding.ActivityDetailPageBinding
 import com.ezgiyilmaz.sporfinder.models.GetPlayerModel
 import com.ezgiyilmaz.sporfinder.models.GetRivalModel
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class DetailPage : AppCompatActivity() {
     private lateinit var binding: ActivityDetailPageBinding
     private val db = FirebaseFirestore.getInstance()
     var category = ""
+    private var auth=FirebaseAuth.getInstance()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailPageBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        var matchid = intent.getStringExtra("playerId")
-        var rivalId = intent.getStringExtra("rivalId")
+        val matchid = intent.getStringExtra("playerId")
+        val rivalId = intent.getStringExtra("rivalId")
         try {
             db.collection("oyuncuBul").document(matchid!!).get().addOnSuccessListener { document ->
                 println("oyuncu Bul" + document)
@@ -58,7 +64,6 @@ class DetailPage : AppCompatActivity() {
         try {
             db.collection("rakipBul").document(rivalId!!).get().addOnSuccessListener { document ->
                 println("rakip bul documneti = " + document)
-
                 if (document != null) {
                     println("rakip bul documneti 2 = " + document)
                     val rival = document.toObject(GetRivalModel::class.java)
@@ -88,29 +93,32 @@ class DetailPage : AppCompatActivity() {
             insets
         }
 
+
+
         binding.messageButton.setOnClickListener {
-            db.collection("oyuncuBul").document(matchid!!).get().addOnSuccessListener {document->
+            db.collection("oyuncuBul").document(matchid!!).get().addOnSuccessListener { document ->
                 println("oyuncu Bul" + document)
                 if (document != null) {
                     val player = document.toObject(GetPlayerModel::class.java)
                     val creatorUserId = player!!.userid
                     println("Maçı oluşturan kişinin ID'si: $creatorUserId")
+                    val user = auth.currentUser!!.uid
+                    if (user != null) {
+                        val intent = Intent(this, MessagesPage::class.java).apply {
+                            putExtra("rivalId", rivalId)
+                            putExtra("creatorUserId", creatorUserId)
+                            Log.d("creatorUserId", "onCreate:creatorUserId " + creatorUserId)
 
-                    val intent = Intent(this, MessagesPage::class.java).apply {
-                        putExtra("rivalId", rivalId)
-                        putExtra("creatorUserId", creatorUserId)
-                        Log.d("creatorUserId", "onCreate:creatorUserId " + creatorUserId)
-
+                        }
+                        startActivity(intent)
+                    } else {
+                      Toast.makeText(this,"Lütfen Giriş Yapınız",Toast.LENGTH_LONG).show()
                     }
-                    startActivity(intent)
-
                 }
-
+            }
         }
 
-        }
     }
-
     fun getImage() {
         when (category) {
             "Futbol" -> {
