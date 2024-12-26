@@ -4,8 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.ezgiyilmaz.sporfinder.databinding.ChatsItemBinding
-import com.ezgiyilmaz.sporfinder.models.Login
-import com.ezgiyilmaz.sporfinder.models.Register
+import com.ezgiyilmaz.sporfinder.models.chatsUser
 
 class ChatsAdapter(var chatsList: List<chatsUser>):RecyclerView.Adapter<ChatsAdapter.ChatsHolder>() {
 
