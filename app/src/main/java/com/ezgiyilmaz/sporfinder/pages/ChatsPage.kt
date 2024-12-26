@@ -8,12 +8,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ezgiyilmaz.sporfinder.Adapters.ChatsAdapter
-import com.ezgiyilmaz.sporfinder.Adapters.chatsUser
+import com.ezgiyilmaz.sporfinder.models.chatsUser
 import com.ezgiyilmaz.sporfinder.R
 import com.ezgiyilmaz.sporfinder.databinding.ActivityChatsPageBinding
-import com.ezgiyilmaz.sporfinder.models.Messages
-import com.ezgiyilmaz.sporfinder.models.Register
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -25,7 +22,7 @@ class ChatsPage : AppCompatActivity() {
     private lateinit var chatsAdapter: ChatsAdapter
     private val chatUser = ArrayList<chatsUser>()
     private var namee: String? = null
-    private var message: String? = null
+    private var chatsList: List<String>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityChatsPageBinding.inflate(layoutInflater)
@@ -45,11 +42,15 @@ class ChatsPage : AppCompatActivity() {
         binding.recyclerViewId.adapter = chatsAdapter
 
         val user = auth.currentUser!!.uid
+
+
+
         db.collection("user").document(user).get().addOnSuccessListener { document ->
             if (document != null) {
                 val conversationUsers = document.get("conversationUsers") as? List<String>
                 if (conversationUsers != null) {
                     for (conversationUser in conversationUsers) {
+
                         Log.d(
                             "conversationUsers",
                             "chatsShow: conversationUsers" + conversationUser
@@ -58,6 +59,67 @@ class ChatsPage : AppCompatActivity() {
                             .addOnSuccessListener {
                                 if (it != null) {
                                     namee = it.getString("name")
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+                                    println(namee)
+
+                                }
+                                var mesajlasankisiler=getConversationId(user, conversationUser)
+                                Log.d("TAG", "onCreate:mesajlasankisiler   "+mesajlasankisiler)
+                                db.collection("chats").document(mesajlasankisiler!!).collection("chat").orderBy("timestamp",Query.Direction.DESCENDING).limit(1).get().addOnSuccessListener {doc->
+                                    for(documents in doc){
+                                        val messagesPerson=documents.getString("messages")
+                                        Log.d("doc", "onCreate: doc"+doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        println(doc)
+                                        val chatsmessage=chatsUser(
+                                            name=namee,
+                                            lastMessage=messagesPerson
+                                        )
+                                        chatUser.add(chatsmessage)
+                                        chatsAdapter.notifyDataSetChanged()
+                                    }
                                 }
 
                             }.addOnFailureListener {
@@ -70,7 +132,18 @@ class ChatsPage : AppCompatActivity() {
                 }
             }
         }
-   
+
+
+
+
+        }
     }
 
-}
+
+    fun getConversationId(senderId: String, matchCreatorId: String): String {
+        return if (senderId < matchCreatorId) {
+            "$senderId$matchCreatorId"
+        } else {
+            "$matchCreatorId$senderId"
+        }
+    }

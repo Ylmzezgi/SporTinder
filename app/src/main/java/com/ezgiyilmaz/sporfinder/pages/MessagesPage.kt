@@ -37,7 +37,6 @@ class MessagesPage : AppCompatActivity() {
 
         val senderId = auth.currentUser!!.uid
         val conversationId = getConversationId(senderId, matchCreatorId)
-        intent.putExtra("persons",conversationId)
 
         Log.d("TAG", "matchİdMessgePage: " + matchid)
 

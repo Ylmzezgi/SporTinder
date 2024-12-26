@@ -1,4 +1,4 @@
-package com.ezgiyilmaz.sporfinder.Adapters
+package com.ezgiyilmaz.sporfinder.models
 
 import com.google.firebase.Timestamp
 

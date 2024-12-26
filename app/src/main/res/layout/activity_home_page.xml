@@ -45,22 +45,9 @@
                     android:textSize="28sp"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/imageView3"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ImageButton
-                    android:id="@+id/imageView3"
-                    android:onClick="imageOnClick"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:gravity="right"
-                    android:layout_marginRight="20dp"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/user"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -114,8 +101,9 @@
                 android:layout_height="match_parent">
 
 
-                <ImageView
+                <ImageButton
                     android:id="@+id/imageView5"
+                    android:onClick="createMatchImageButtonClick"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:layout_marginEnd="16dp"
@@ -125,24 +113,6 @@
                     android:src="@drawable/add"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
-
-                <ImageButton
-                    android:id="@+id/imageView4"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="343dp"
-                    android:layout_marginTop="400dp"
-                    android:layout_marginEnd="29dp"
-                    android:layout_marginBottom="30dp"
-                    android:gravity="right"
-                    android:onClick="image4OnClick"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/user"
-                    app:layout_constraintBottom_toTopOf="@+id/imageView5"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

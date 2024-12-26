@@ -8,6 +8,8 @@ import android.content.Intent
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -32,6 +34,7 @@ import com.ezgiyilmaz.sporfinder.models.FilterCriteria
 import com.ezgiyilmaz.sporfinder.models.rivalModel
 import com.ezgiyilmaz.sporfinder.util.constants
 import com.ezgiyilmaz.sporfinder.viewModel.LocationPickerViewModel
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -52,7 +55,7 @@ class HomePage : AppCompatActivity() {
     private lateinit var locationPicker: LocationPickerViewModel
     private lateinit var query: Query
     private lateinit var toggle: ActionBarDrawerToggle
-    private var auth=FirebaseAuth.getInstance()
+    private var auth = FirebaseAuth.getInstance()
     var selected = "player"
     var criteria = FilterCriteria()
 
@@ -63,15 +66,14 @@ class HomePage : AppCompatActivity() {
         println("HomePage başlatılıyor.")
         binding = ActivityHomePageBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         rivalViewModel = ViewModelProvider(this).get(PagingViewModel::class.java)
         println("PagingViewModel oluşturuldu.")
-
-
         locationPicker = ViewModelProvider(this).get(LocationPickerViewModel::class.java)
         locationPicker.getApiInterface()
-       // query = db.collection("oyuncuBul")
         setAdapter()
         fillList()
+        setSupportActionBar(binding.toolbar)
         toggle = ActionBarDrawerToggle(
             this,
             binding.main,
@@ -87,11 +89,11 @@ class HomePage : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
         // RadioButton dinleyicisi ayarlanıyor
         binding.radioRival.setOnCheckedChangeListener { _, isChecked ->
             setAdapter()
             println("RadioButton durumu değiştirildi. Seçili: ${if (isChecked) "rival" else "player"}")
-          //  query = db.collection("oyuncuBul")
 
             if (isChecked) {
                 criteria = FilterCriteria()
@@ -140,6 +142,42 @@ class HomePage : AppCompatActivity() {
 
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menuitem, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.nav_profile -> {
+                // Profile git
+                return true
+            }
+            R.id.nav_login -> {
+                val user = auth.currentUser!!.uid
+                if (user != null) {
+                    Toast.makeText(
+                        this,
+                        "Başka bir hesapla giriş yapmak için önce çıkış yapmanız gerekiyor!!!",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                } else {
+                    val intent = Intent(this, LoginPage::class.java)
+                    startActivity(intent)
+                }
+                return true
+            }
+
+            R.id.nav_signout -> {
+                auth.signOut()
+                Toast.makeText(this, "Çıkış Yapıldı", Toast.LENGTH_SHORT).show()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
     // Oyuncu listesini doldurur
     fun fillList() {
         println("Oyuncu listesi dolduruluyor.")
@@ -153,20 +191,6 @@ class HomePage : AppCompatActivity() {
         }
 
     }
-
-    // Rakip listesini doldurur
-//    fun fillListRival() {
-//        println("Rakip listesi dolduruluyor.")
-//        lifecycleScope.launch {
-//            rivalAdapter
-//            val playerResult = rivalViewModel.pagingData(criteria, selected)
-//            println("Oyuncu listesi güncelleniyor.")
-//            playerResult.collectLatest {
-//                rivalAdapter.submitData(it)
-//            }
-//        }
-//    }
-
 
     // RecyclerView adaptörünü ayarlar
     fun setAdapter() {
@@ -267,22 +291,6 @@ class HomePage : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    fun imageOnClick(view: View) {
-        val intent = Intent(this, ChatsPage::class.java)
-        startActivity(intent)
-
-    }
-    fun image4OnClick(view: View) {
-        val user=auth.currentUser!!.uid
-        if(user!=null) {
-            val intent = Intent(this, LoginPage::class.java)
-            startActivity(intent)
-        }else{
-            Toast.makeText(this,"Başka bir hesapla giriş yapmak için önce çıkış yapmanız gerekiyor!!!",Toast.LENGTH_LONG).show()
-        }
-
     }
 
     private fun showDatePicker() {
@@ -478,5 +486,22 @@ class HomePage : AppCompatActivity() {
                 fillList()
             }
         }
+    }
+
+    fun createMatchImageButtonClick(view: View) {
+        if (auth.currentUser!!.uid != null) {
+           val intent=Intent(this,CreateMatchPage::class.java)
+            startActivity(intent)
+        } else {
+            Snackbar.make(
+                view,
+                "Maç oluşturmak için önce giriş yapmalısınız!",
+                Snackbar.LENGTH_LONG
+            ).setAction("Giriş Yap") {
+                val intent=Intent(this,CreateMatchPage::class.java)
+                startActivity(intent)
+            }
+        }
+
     }
 }

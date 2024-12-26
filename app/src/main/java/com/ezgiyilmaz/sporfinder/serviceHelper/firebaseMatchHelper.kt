@@ -4,6 +4,7 @@ import com.ezgiyilmaz.sporfinder.models.GetPlayerModel
 import com.ezgiyilmaz.sporfinder.models.GetRivalModel
 import com.ezgiyilmaz.sporfinder.models.playerModel
 import com.ezgiyilmaz.sporfinder.models.rivalModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.tasks.await
@@ -12,6 +13,7 @@ class firebaseMatchHelper {
     private val db = FirebaseFirestore.getInstance()
     val getRivalList = mutableListOf<GetRivalModel>()
     val getPlayerList = mutableListOf<GetPlayerModel>()
+    private val auth=FirebaseAuth.getInstance()
 
     suspend fun rivalAddFirebase(rivalModel: rivalModel): String {
         try {
@@ -23,12 +25,13 @@ class firebaseMatchHelper {
     }
 
     suspend fun playerAddFirebase(playerModel: playerModel):String{
-        try {
-            db.collection("oyuncuBul").add(playerModel).await()
-            return "eklendi"
-        }catch (e:Exception){
-            return e.localizedMessage
-        }
+            try {
+                db.collection("oyuncuBul").add(playerModel).await()
+                return "eklendi"
+            } catch (e: Exception) {
+                return e.localizedMessage
+            }
+
     }
 
 
