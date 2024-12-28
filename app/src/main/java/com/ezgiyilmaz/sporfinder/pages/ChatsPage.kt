@@ -22,6 +22,7 @@ class ChatsPage : AppCompatActivity() {
     private lateinit var chatsAdapter: ChatsAdapter
     private val chatUser = ArrayList<chatsUser>()
     private var namee: String? = null
+    private var selectedImage:String?=null
     private var chatsList: List<String>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,8 +35,7 @@ class ChatsPage : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val persons = intent.getStringExtra("persons") ?: ""
-        Log.d("persons", "onCreate: persons"+persons)
+
 
         binding.recyclerViewId.layoutManager = LinearLayoutManager(this)
         chatsAdapter = ChatsAdapter(chatUser)
@@ -59,25 +59,9 @@ class ChatsPage : AppCompatActivity() {
                             .addOnSuccessListener {
                                 if (it != null) {
                                     namee = it.getString("name")
+                                    selectedImage=it.getString("selectedImage")
                                     println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
-                                    println(namee)
+
 
                                 }
                                 var mesajlasankisiler=getConversationId(user, conversationUser)
@@ -87,36 +71,12 @@ class ChatsPage : AppCompatActivity() {
                                         val messagesPerson=documents.getString("messages")
                                         Log.d("doc", "onCreate: doc"+doc)
                                         println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
-                                        println(doc)
                                         val chatsmessage=chatsUser(
                                             name=namee,
-                                            lastMessage=messagesPerson
+                                            lastMessage=messagesPerson,
+                                            selectedImage =selectedImage
                                         )
+                                        Log.d("TAG", "onCreate: selected"+selectedImage)
                                         chatUser.add(chatsmessage)
                                         chatsAdapter.notifyDataSetChanged()
                                     }
@@ -132,9 +92,6 @@ class ChatsPage : AppCompatActivity() {
                 }
             }
         }
-
-
-
 
         }
     }
