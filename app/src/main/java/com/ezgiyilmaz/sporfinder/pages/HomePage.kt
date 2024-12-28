@@ -143,6 +143,7 @@ class HomePage : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        // Menü şişiriliyor
         menuInflater.inflate(R.menu.menuitem, menu)
         return true
     }
@@ -150,33 +151,46 @@ class HomePage : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_profile -> {
-                // Profile git
+                val intent = Intent(this, ProfilePage::class.java)
+                startActivity(intent)
+                return true
+            }
+            R.id.nav_message -> {
+                val intent = Intent(this, ChatsPage::class.java)
+                startActivity(intent)
                 return true
             }
             R.id.nav_login -> {
-                val user = auth.currentUser!!.uid
+                val user = auth.currentUser
                 if (user != null) {
+                    // Kullanıcı zaten giriş yapmış
                     Toast.makeText(
                         this,
                         "Başka bir hesapla giriş yapmak için önce çıkış yapmanız gerekiyor!!!",
                         Toast.LENGTH_LONG
                     ).show()
-
                 } else {
+                    // Login sayfasına yönlendirme
                     val intent = Intent(this, LoginPage::class.java)
                     startActivity(intent)
                 }
                 return true
             }
-
             R.id.nav_signout -> {
-                auth.signOut()
-                Toast.makeText(this, "Çıkış Yapıldı", Toast.LENGTH_SHORT).show()
+                val user = auth.currentUser
+                if (user != null) {
+                    // Kullanıcı çıkış yapıyor
+                    auth.signOut()
+                    Toast.makeText(this, "Çıkış Yapıldı", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Zaten giriş yapılmamış!", Toast.LENGTH_SHORT).show()
+                }
                 return true
             }
         }
         return super.onOptionsItemSelected(item)
     }
+
 
     // Oyuncu listesini doldurur
     fun fillList() {
