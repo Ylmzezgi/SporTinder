@@ -205,6 +205,7 @@ class RegisterPage : AppCompatActivity() {
         val email = binding.emailEditText.text.toString()
         val password = binding.passwordEditText.text.toString()
         val againPassword = binding.againPasswordEditText.text.toString()
+
 //        if (selectedBitmap != null) {
 //            val smallBitmap = makeSmallerBitmap(selectedBitmap!!, 300)
 //            val outputStream = ByteArrayOutputStream()

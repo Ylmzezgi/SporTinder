@@ -22,6 +22,7 @@ class ChatsPage : AppCompatActivity() {
     private lateinit var chatsAdapter: ChatsAdapter
     private val chatUser = ArrayList<chatsUser>()
     private var namee: String? = null
+    private var messagesPerson :String?=null
     private var selectedImage:String?=null
     private var chatsList: List<String>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,36 +60,34 @@ class ChatsPage : AppCompatActivity() {
                             .addOnSuccessListener {
                                 if (it != null) {
                                     namee = it.getString("name")
-                                    selectedImage=it.getString("selectedImage")
+                                    selectedImage = it.getString("selectedImage")
                                     println(namee)
+                                    println(selectedImage)
 
 
                                 }
+
                                 var mesajlasankisiler=getConversationId(user, conversationUser)
                                 Log.d("TAG", "onCreate:mesajlasankisiler   "+mesajlasankisiler)
-                                db.collection("chats").document(mesajlasankisiler!!).collection("chat").orderBy("timestamp",Query.Direction.DESCENDING).limit(1).get().addOnSuccessListener {doc->
+                                db.collection("chats").document(mesajlasankisiler!!).collection("chat").orderBy("timestamp",Query.Direction.DESCENDING).limit(1).get().addOnSuccessListener { doc->
                                     for(documents in doc){
-                                        val messagesPerson=documents.getString("messages")
-                                        Log.d("doc", "onCreate: doc"+doc)
+                                        messagesPerson=documents.getString("messages")
+                                        Log.d("doc", "onCreate: doc"+messagesPerson)
                                         println(doc)
-                                        val chatsmessage=chatsUser(
-                                            name=namee,
-                                            lastMessage=messagesPerson,
-                                            selectedImage =selectedImage
-                                        )
-                                        Log.d("TAG", "onCreate: selected"+selectedImage)
-                                        chatUser.add(chatsmessage)
-                                        chatsAdapter.notifyDataSetChanged()
                                     }
                                 }
-
+                                val chatsmessage=chatsUser(
+                                    name=namee,
+                                    lastMessage=messagesPerson,
+                                    selectedImage =selectedImage
+                                )
+                                Log.d("TAG", "onCreate: selected"+messagesPerson)
+                                chatUser.add(chatsmessage)
+                                chatsAdapter.notifyDataSetChanged()
                             }.addOnFailureListener {
                                 it.localizedMessage
                             }
-
                     }
-
-
                 }
             }
         }
