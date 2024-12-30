@@ -63,12 +63,10 @@ class HomePage : AppCompatActivity() {
     private var db = FirebaseFirestore.getInstance()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        println("HomePage başlatılıyor.")
         binding = ActivityHomePageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         rivalViewModel = ViewModelProvider(this).get(PagingViewModel::class.java)
-        println("PagingViewModel oluşturuldu.")
         locationPicker = ViewModelProvider(this).get(LocationPickerViewModel::class.java)
         locationPicker.getApiInterface()
         setAdapter()

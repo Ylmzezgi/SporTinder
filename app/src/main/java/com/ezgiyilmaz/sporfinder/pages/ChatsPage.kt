@@ -24,7 +24,6 @@ class ChatsPage : AppCompatActivity() {
     private var namee: String? = null
     private var messagesPerson :String?=null
     private var selectedImage:String?=null
-    private var chatsList: List<String>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityChatsPageBinding.inflate(layoutInflater)

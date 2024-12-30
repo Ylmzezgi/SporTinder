@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.ViewModel
 import com.ezgiyilmaz.sporfinder.models.Register
 import com.ezgiyilmaz.sporfinder.models.Login
+import com.ezgiyilmaz.sporfinder.pages.HomePage
 import com.ezgiyilmaz.sporfinder.pages.MainActivity
 import com.ezgiyilmaz.sporfinder.pages.RegisterPage
 import com.google.firebase.Firebase

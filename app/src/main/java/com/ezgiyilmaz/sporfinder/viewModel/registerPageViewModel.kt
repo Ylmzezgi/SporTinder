@@ -28,7 +28,6 @@ class registerPageViewModel : ViewModel() {
 
     lateinit var db: FirebaseFirestore
     lateinit var auth: FirebaseAuth
-    var storage=FirebaseStorage.getInstance()
 
     init {
         // Firebase'i başlatma
@@ -47,7 +46,7 @@ class registerPageViewModel : ViewModel() {
         email: String,
         password: String,
         passwordAgain: String,
-        selectedPicture: Uri?
+        selectedImage: Uri?
     ): String {
 
         if (name.isNullOrEmpty())
@@ -77,24 +76,12 @@ class registerPageViewModel : ViewModel() {
         if (!password.equals(passwordAgain))
             return "Şifreler uyuşmuyor!!"
 
-        val user = auth.currentUser
-        if (user != null) {
-            val uuid = UUID.randomUUID()
-            val gorselAdi = "$uuid.jpg"
-            val reference = storage.reference
-            val gorselReferansi = reference.child("images").child(gorselAdi)
-
-            val downloadUrl = gorselReferansi.putFile(selectedPicture!!).await().storage.downloadUrl.await()
-
-            val profileUpdates = userProfileChangeRequest {
-                photoUri = Uri.parse(downloadUrl.toString())
-            }
-            user.updateProfile(profileUpdates).await()
-        }
 
 
         val login = Login(email, password)
-        val register = Register(name, surname, userName, cityLocation, townShip,selectedPicture.toString())
+        val register = Register(name, surname, userName, cityLocation, townShip,
+            selectedImage!!.toString()
+        )
 
         val result = createUser(login, register)
         return result

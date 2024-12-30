@@ -9,4 +9,5 @@ data class Register(
     val userName:String,
     val cityLocation:String,
     val townShip:String,
-    val selectedImage: String)
+    val selectedImage:String
+    )

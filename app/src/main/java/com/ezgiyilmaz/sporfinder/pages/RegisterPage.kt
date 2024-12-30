@@ -126,7 +126,7 @@ class RegisterPage : AppCompatActivity() {
     }
 
     fun circleImageClick(view: View) {
-        binding.circleImage.visibility = View.VISIBLE
+       // binding.circleImage.visibility = View.VISIBLE
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.READ_MEDIA_IMAGES
@@ -177,25 +177,6 @@ class RegisterPage : AppCompatActivity() {
             }
     }
 
-//    private fun makeSmallerBitmap(image: Bitmap, maximumSize: Int): Bitmap {
-//        var width = image.width
-//        var height = image.height
-//
-//        val bitmapRatio: Double = width.toDouble() / height.toDouble()
-//        if (bitmapRatio > 1) {
-//            width = maximumSize
-//            val scaledHeight = width / bitmapRatio
-//            height = scaledHeight.toInt()
-//
-//        } else {
-//            height = maximumSize
-//            val scaledWidh = height * bitmapRatio
-//            width = scaledWidh.toInt()
-//        }
-//        return Bitmap.createScaledBitmap(image, width, height, true)
-//    }
-
-
     fun saveOnClick(view: View) {
         val name = binding.nameEditText.text.toString()
         val surname = binding.surnameEditText.text.toString()
@@ -223,7 +204,7 @@ class RegisterPage : AppCompatActivity() {
                     email,
                     password,
                     againPassword,
-                    selectedPicture!!
+                    selectedPicture
                 )
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@RegisterPage, result, Toast.LENGTH_LONG).show()
